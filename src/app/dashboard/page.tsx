@@ -19,7 +19,7 @@ export default function Dashboard() {
   const { addresses, isLoading, error } = useContracts()
   const { hasOrganization } = useHasOrganization()
 
-  const { address } = useAccount()
+  const { address: user } = useAccount()
   const {  } = useConnect()
 
   const {
@@ -31,7 +31,7 @@ export default function Dashboard() {
       abi: FACTORYABI,
       address: LITTLEFINGER_FACTORY_ADDRESS,
       functionName: "get_vault_org_pair",
-      args: [address!],
+      args: [user!],
       // enabled: !!address && isConnected,
     })
 
@@ -104,36 +104,47 @@ export default function Dashboard() {
   const vaultAddress = contractAddressToHex(contractAddresses?.[1]);
   const {
     data: vaultBalance, error: vaultBalanceError
-  } = useReadContract({
+  } = useReadContract(
+    user ? {
     abi: VAULTABI,
     address: vaultAddress,
     functionName: "get_balance",
     args: []
-  })
+  } : ({} as any))
 
-  vaultBalance && console.log(Number(BigInt(vaultBalance)))
+  vaultBalance && console.log(Number(vaultBalance))
 
   const {
     data: members, error: CoreAbiError
-  } = useReadContract({
+  } = useReadContract(
+    user ? {
     abi: COREABI,
     address: orgAddress!,
     functionName: "get_members",
     args: []
-  })
+  } : ({} as any))
 
   console.log((members as Array<any>)?.length);
 
   const {
     data: disbursementSchedule, error: disbursementScheduleError
-  } = useReadContract({
+  } = useReadContract(
+    user ? {
     abi: COREABI,
     address: orgAddress,
     functionName: "get_current_schedule",
     args: []
-  })
+  } : {} as any)
 
   console.log(disbursementSchedule)
+
+  const lastExecution = disbursementSchedule?.last_execution;
+  const interval = disbursementSchedule?.interval;
+  let nextPayoutDate = "";
+
+  if (Number(interval) === 0) {
+    nextPayoutDate = "Unset"
+  }
 
   return (
     <div className="space-y-6">
@@ -145,8 +156,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <DashboardTopCards vaultBalance={vaultBalance as number} activeMembers={members?.length as number}/>
+      <DashboardTopCards vaultBalance={Number?.(vaultBalance)} activeMembers={members?.length as number} nextPayoutDate={nextPayoutDate}/>
 
+      {/* History */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Disbursements</CardTitle>

@@ -60,6 +60,20 @@ export const FACTORYABI = [
     ]
   },
   {
+    "type": "enum",
+    "name": "core::option::Option::<core::starknet::class_hash::ClassHash>",
+    "variants": [
+      {
+        "name": "Some",
+        "type": "core::starknet::class_hash::ClassHash"
+      },
+      {
+        "name": "None",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "type": "interface",
     "name": "littlefinger::interfaces::ifactory::IFactory",
     "items": [
@@ -152,6 +166,22 @@ export const FACTORYABI = [
           }
         ],
         "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "update_class_hash",
+        "inputs": [
+          {
+            "name": "vault_hash",
+            "type": "core::option::Option::<core::starknet::class_hash::ClassHash>"
+          },
+          {
+            "name": "core_hash",
+            "type": "core::option::Option::<core::starknet::class_hash::ClassHash>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
   },

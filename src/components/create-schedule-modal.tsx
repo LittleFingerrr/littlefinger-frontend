@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,7 +12,12 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { cn, contractAddressToHex } from "@/lib/utils"
+import { useAccount, useContract, useReadContract, useSendTransaction } from "@starknet-react/core"
+import { COREABI } from "@/lib/abi/core-abi"
+import { useOrgAddress } from "@/components/contract-provider"
+import { FACTORYABI } from "@/lib/abi/factory-abi"
+import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
 
 interface CreateScheduleModalProps {
   open: boolean
@@ -20,15 +25,72 @@ interface CreateScheduleModalProps {
 }
 
 export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalProps) {
+  
   const [formData, setFormData] = useState({
-    name: "",
-    type: "",
+    scheduleType: "", // "0" for RECURRING, "1" for ONETIME 
     startDate: new Date(),
     endDate: undefined as Date | undefined,
-    interval: "30",
-    intervalUnit: "days",
-    recipients: "all",
+    intervalValue: "30",
+    intervalUnit: "days", // days, weeks, months
   })
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { address: user } = useAccount();
+  
+  const { data: ContractAddresses } = useReadContract(
+    user ? {
+    abi: FACTORYABI,
+    address: LITTLEFINGER_FACTORY_ADDRESS,
+    functionName: "get_vault_org_pair",
+    args: [user!],
+    watch: true
+  }: ({} as any))
+
+  const { contract } = useContract({
+    abi: COREABI,
+    address: contractAddressToHex(ContractAddresses?.[0]),
+  })
+
+  // Convert interval to seconds based on unit
+
+  const getIntervalInSeconds = (value: string, unit: string): number => {
+    const numValue = Number.parseInt(value)
+    switch (unit) {
+      case "days":
+        return numValue * 24 * 60 * 60
+      case "weeks":
+        return numValue * 7 * 24 * 60 * 60
+      case "months":
+        return numValue * 30 * 24 * 60 * 60 // Approximate 30 days per month
+      default:
+        return numValue * 24 * 60 * 60 // Default to days
+    }
+  }
+
+  // Convert Date to Unix timestamp
+  const dateToTimestamp = (date: Date): number => {
+    return Math.floor(date.getTime() / 1000)
+  }
+
+  const calls = useMemo(() => {
+    const inputIsValid = formData.scheduleType !== "" && formData.startDate;
+
+    if (!inputIsValid || !contract || !user) return
+
+    const startTimestamp = dateToTimestamp(formData.startDate)
+    const endTimestamp = formData.endDate ? dateToTimestamp(formData?.endDate) : startTimestamp + 365 * 24 * 60 * 60;
+    const intervalInSeconds = formData.intervalValue ? getIntervalInSeconds(formData.intervalValue, formData.intervalUnit) : 0
+
+
+    return [
+      contract.populate("initialize_disbursement_schedule", [
+        parseInt(formData.scheduleType), startTimestamp, endTimestamp, intervalInSeconds
+      ])
+    ]
+  }, [contract, user, formData])
+
+  const { sendAsync } = useSendTransaction({ calls })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -43,10 +105,37 @@ export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalP
     setFormData((prev) => ({ ...prev, [name]: date }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Creating schedule:", formData)
-    onOpenChange(false)
+
+    setIsSubmitting(true)
+    try {
+      // console.log("Creating schedule with data:", {
+      //   scheduleType: Number.parseInt(formData.scheduleType),
+      //   startTimestamp: dateToTimestamp(formData.startDate),
+      //   endTimestamp: formData.endDate
+      //     ? dateToTimestamp(formData.endDate)
+      //     : dateToTimestamp(formData.startDate) + 365 * 24 * 60 * 60,
+      //   intervalSeconds: getIntervalInSeconds(formData.intervalValue, formData.intervalUnit),
+      // })
+      await sendAsync();
+      // console.log("Schedule created successfully:", result)
+
+      // Reset form and close modal
+      setFormData({
+        scheduleType: "",
+        startDate: new Date(),
+        endDate: undefined,
+        intervalValue: "30",
+        intervalUnit: "days",
+      })
+      onOpenChange(false)
+    } catch (error) {
+      console.error("Error creating schedule:", error)
+      alert("Failed to create schedule. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -55,21 +144,16 @@ export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalP
         <DialogHeader>
           <DialogTitle>Create Disbursement Schedule</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Schedule Name*</Label>
-            <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type">Schedule Type*</Label>
-            <Select onValueChange={(value) => handleSelectChange("type", value)} required>
+            <Label htmlFor="scheduleType">Schedule Type*</Label>
+            <Select onValueChange={(value) => handleSelectChange("scheduleType", value)} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select schedule type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="fixed">Fixed (Regular intervals with fixed amounts)</SelectItem>
-                <SelectItem value="variable">Variable (Flexible schedule with calculated amounts)</SelectItem>
+                <SelectItem value="0">Recurring (Repeats at regular intervals)</SelectItem>
+                <SelectItem value="1">One-time (Single execution)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -95,6 +179,7 @@ export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalP
                     mode="single"
                     selected={formData.startDate}
                     onSelect={(date) => handleDateChange("startDate", date)}
+                    disabled={(date) => date < new Date()}
                     initialFocus
                   />
                 </PopoverContent>
@@ -102,7 +187,7 @@ export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="endDate">End Date (Optional)</Label>
+              <Label htmlFor="endDate">End Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -121,67 +206,58 @@ export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalP
                     mode="single"
                     selected={formData.endDate}
                     onSelect={(date) => handleDateChange("endDate", date)}
+                    disabled={(date) => date < (formData.startDate || new Date())}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
+              <p className="text-xs text-muted-foreground">Leave empty for 1 year duration</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="interval">Interval*</Label>
-            <div className="flex gap-2">
-              <Input
-                id="interval"
-                name="interval"
-                type="number"
-                min="1"
-                value={formData.interval}
-                onChange={handleChange}
-                className="flex-1"
-                required
-              />
-              <Select
-                value={formData.intervalUnit}
-                onValueChange={(value) => handleSelectChange("intervalUnit", value)}
-              >
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="days">Days</SelectItem>
-                  <SelectItem value="weeks">Weeks</SelectItem>
-                  <SelectItem value="months">Months</SelectItem>
-                </SelectContent>
-              </Select>
+          {formData.scheduleType === "0" && (
+            <div className="space-y-2">
+              <Label htmlFor="interval">Interval* (for recurring schedules)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="intervalValue"
+                  name="intervalValue"
+                  type="number"
+                  min="1"
+                  value={formData.intervalValue}
+                  onChange={handleChange}
+                  className="flex-1"
+                  required
+                />
+                <Select
+                  value={formData.intervalUnit}
+                  onValueChange={(value) => handleSelectChange("intervalUnit", value)}
+                >
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="days">Days</SelectItem>
+                    <SelectItem value="weeks">Weeks</SelectItem>
+                    <SelectItem value="months">Months</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground">How often the schedule should execute</p>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="recipients">Recipients*</Label>
-            <Select
-              value={formData.recipients}
-              onValueChange={(value) => handleSelectChange("recipients", value)}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All active members</SelectItem>
-                <SelectItem value="admins">Admins only</SelectItem>
-                <SelectItem value="developers">Developers only</SelectItem>
-                <SelectItem value="custom">Custom selection</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          )}
 
           <DialogFooter className="mt-6">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Create Schedule
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={isSubmitting || !formData.scheduleType || !formData.startDate}
+              onClick={handleSubmit}
+            >
+              {isSubmitting ? "Creating..." : "Create Schedule"}
             </Button>
           </DialogFooter>
         </form>

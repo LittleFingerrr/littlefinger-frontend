@@ -13,18 +13,19 @@ import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
 import { COREABI } from "@/lib/abi/core-abi"
 import { contractAddressToHex } from "@/lib/utils"
+import { CairoCustomEnum } from "starknet"
 
 export default function MembersPage() {
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
 
   // Mock data for members
-  // const members = [
-  //   { id: 1, name: "Alice Smith", alias: "alice_s", role: "Admin", status: "Active" },
-  //   { id: 2, name: "Bob Johnson", alias: "bob_dev", role: "Developer", status: "Active" },
-  //   { id: 3, name: "Charlie Brown", alias: "c_brown", role: "Finance", status: "Active" },
-  //   { id: 4, name: "Dana White", alias: "dana_w", role: "Marketing", status: "Suspended" },
-  //   { id: 5, name: "Eva Green", alias: "eva_ux", role: "Design", status: "Pending" },
-  // ]
+  const members = [
+    { id: 1, name: "Alice Smith", alias: "alice_s", role: "Admin", status: "Active" },
+    { id: 2, name: "Bob Johnson", alias: "bob_dev", role: "Developer", status: "Active" },
+    { id: 3, name: "Charlie Brown", alias: "c_brown", role: "Finance", status: "Active" },
+    { id: 4, name: "Dana White", alias: "dana_w", role: "Marketing", status: "Suspended" },
+    { id: 5, name: "Eva Green", alias: "eva_ux", role: "Design", status: "Pending" },
+  ]
 
   const { address: user } = useAccount()
 
@@ -37,16 +38,37 @@ export default function MembersPage() {
 
   const {
     data: members_from_contract
-  } = useReadContract({
+  } = useReadContract(
+    user ? {
     abi: COREABI,
     address: contractAddressToHex(ContractAddresses?.[0]),
     functionName: "get_members",
     args: []
-  })
+  } : ({} as any))
 
-  const members = members_from_contract as Array<any>;
-  console.log(members_from_contract)
-  console.log(members)
+  // const members = members_from_contract as Array<any>;
+  const safeMembersFromContract = Array.isArray(members_from_contract) ? members_from_contract : [];
+  // console.log(members)
+  // const membersFromContractToMembers = (fromContract: any[]) => {
+  //   let members = [];
+  //   fromContract.forEach(() => {})
+  // }
+  const formattedMembers = () => safeMembersFromContract.map((member, i) => {
+    const firstName = member?.fname;
+    const lastName = member?.lname;
+    const alias = member?.alias;
+
+    const role: CairoCustomEnum = member?.role;
+    const returnedRole = role.activeVariant();
+
+    const status: CairoCustomEnum = member?.status;
+    const returnedStatus = status.activeVariant();
+
+    return {
+      firstName, lastName, alias, returnedRole, returnedStatus
+    }
+  })
+  console.log(formattedMembers())
 
   return (
     <div className="space-y-6">
@@ -125,10 +147,10 @@ export default function MembersPage() {
         </Table>
       </div> */}
 
-      <MemberTable members={members}/>
+      <MemberTable members={formattedMembers()}/>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">Showing 1-5 of 42 members</p>
+        <p className="text-sm text-muted-foreground">Showing 1-5 of {formattedMembers().length} members</p>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" className="h-8 w-8 p-0">
             1

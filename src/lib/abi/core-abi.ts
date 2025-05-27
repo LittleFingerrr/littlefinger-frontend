@@ -365,6 +365,22 @@ export const COREABI = [
       },
       {
         "type": "function",
+        "name": "update_member_base_pay",
+        "inputs": [
+          {
+            "name": "member_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "base_pay",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
         "name": "suspend_member",
         "inputs": [
           {
@@ -471,7 +487,7 @@ export const COREABI = [
     "members": [
       {
         "name": "schedule_id",
-        "type": "core::felt252"
+        "type": "core::integer::u64"
       },
       {
         "name": "status",
@@ -573,7 +589,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           }
         ],
         "outputs": [],
@@ -585,7 +601,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           }
         ],
         "outputs": [],
@@ -597,7 +613,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           }
         ],
         "outputs": [],
@@ -616,11 +632,22 @@ export const COREABI = [
       },
       {
         "type": "function",
+        "name": "get_disbursement_schedules",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<littlefinger::structs::disbursement_structs::DisbursementSchedule>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "retry_failed_disbursement",
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           }
         ],
         "outputs": [],
@@ -679,7 +706,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           }
         ],
         "outputs": [],
@@ -715,7 +742,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           },
           {
             "name": "new_interval",
@@ -731,7 +758,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "schedule_id",
-            "type": "core::felt252"
+            "type": "core::integer::u64"
           },
           {
             "name": "schedule_type",

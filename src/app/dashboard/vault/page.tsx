@@ -1,17 +1,83 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CheckCircle2, DollarSign } from "lucide-react"
 import { PayMemberModal } from "@/components/pay-member-modal"
+import { DepositModal } from "@/components/deposit-modal"
+import { WithdrawModal } from "@/components/withdraw-modal"
+import { FreezeModal } from "@/components/freeze-modal"
+import { useAccount, useContract, useReadContract, useSendTransaction } from "@starknet-react/core"
+import { FACTORYABI } from "@/lib/abi/factory-abi"
+import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { VAULTABI } from "@/lib/abi/vault-abi"
+import { contractAddressToHex } from "@/lib/utils"
+import { COREABI } from "@/lib/abi/core-abi"
 
 export default function VaultPage() {
   const [isPayMemberOpen, setIsPayMemberOpen] = useState(false)
+  const [isDepositOpen, setIsDepositOpen] = useState(false)
+  const [isWithdrawOpen, setIsWithdrawOpen] = useState(false)
+  const [isFreezeOpen, setIsFreezeOpen] = useState(false)
+  const [isPaying, setIsPaying] = useState(false);
+
+  const { address: user } = useAccount()
+
+  const { data: ContractAddresses } = useReadContract(
+    user
+      ? {
+          abi: FACTORYABI,
+          address: LITTLEFINGER_FACTORY_ADDRESS,
+          functionName: "get_vault_org_pair",
+          args: [user!],
+          watch: true,
+        }
+      : ({} as any),
+  )
+
+  const { data: contractVaultBalance, isLoading: vaultBalanceIsLoading } = useReadContract(
+    user
+      ? {
+          abi: VAULTABI,
+          address: contractAddressToHex(ContractAddresses?.[1]),
+          functionName: "get_balance",
+          args: [],
+          watch: true,
+        }
+      : ({} as any),
+  )
+
+  const { contract } = useContract({
+    abi: COREABI,
+    address: contractAddressToHex(ContractAddresses?.[0]),
+  })
+
+  const paymentCall = useMemo(() => {
+    if (!contract || !user) return
+
+    return [
+      contract.populate("schedule_payout", [])
+    ]
+  }, [contract, user])
+
+  const { sendAsync: sendPayment } = useSendTransaction({ calls: paymentCall })
+
+  const handlePayment = async () => {
+    setIsPaying(true);
+
+    try {
+      console.log("Sending Payment");
+      await sendPayment();
+    } catch(err) {
+      console.log(err)
+    } finally {
+      setIsPaying(false);
+    }
+  }
 
   // Mock data for vault
-  const vaultBalance = "$150,000.00"
   const vaultStatus = "Active & Operational"
 
   const transactions = [
@@ -19,6 +85,14 @@ export default function VaultPage() {
     { id: 2, type: "Withdrawal", amount: "-$10,000.00", status: "Success", date: "May 10, 2024" },
     { id: 3, type: "Payout", amount: "-$18,700.00", status: "Success", date: "Apr 15, 2024" },
   ]
+
+  // Format the contract balance for display
+  const formatBalance = (balance: any) => {
+    if (!balance) return "0.00"
+    // Convert from wei to ETH (assuming 18 decimals)
+    const balanceInEth = Number(balance) / 1e18
+    return balanceInEth.toFixed(4)
+  }
 
   return (
     <div className="space-y-6">
@@ -34,7 +108,14 @@ export default function VaultPage() {
               <div className="mr-4 rounded-full bg-blue-100 p-2">
                 <DollarSign className="h-6 w-6 text-blue-600" />
               </div>
-              <span className="text-3xl font-bold">{vaultBalance}</span>
+              <div className="flex flex-col">
+                <span className="text-3xl font-bold">
+                  {vaultBalanceIsLoading ? "Loading..." : `${formatBalance(contractVaultBalance)} ETH`}
+                </span>
+                {contractVaultBalance && (
+                  <span className="text-sm text-muted-foreground">Raw: {Number(contractVaultBalance).toString()}</span>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -55,13 +136,21 @@ export default function VaultPage() {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        <Button className="bg-blue-600 hover:bg-blue-700">Deposit Funds</Button>
-        <Button variant="outline">Withdraw Funds</Button>
-        <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700">
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsDepositOpen(true)}>
+          Deposit Funds
+        </Button>
+        <Button variant="outline" onClick={() => setIsWithdrawOpen(true)}>
+          Withdraw Funds
+        </Button>
+        <Button
+          variant="outline"
+          className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+          onClick={() => setIsFreezeOpen(true)}
+        >
           Emergency Freeze
         </Button>
-        <Button variant="outline" onClick={() => setIsPayMemberOpen(true)}>
-          Pay Member
+        <Button variant="outline" onClick={handlePayment} disabled={isPaying}>
+          Payout
         </Button>
       </div>
 
@@ -124,7 +213,11 @@ export default function VaultPage() {
         </div>
       </div>
 
-      <PayMemberModal open={isPayMemberOpen} onOpenChange={setIsPayMemberOpen} />
+      {/* All Modals */}
+      {/* <PayMemberModal open={isPayMemberOpen} onOpenChange={setIsPayMemberOpen} /> */}
+      <DepositModal open={isDepositOpen} onOpenChange={setIsDepositOpen} />
+      <WithdrawModal open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen} />
+      <FreezeModal open={isFreezeOpen} onOpenChange={setIsFreezeOpen} />
     </div>
   )
 }

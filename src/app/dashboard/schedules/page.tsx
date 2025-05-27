@@ -1,12 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CalendarIcon, CheckCircle2, Plus } from "lucide-react"
 import { CreateScheduleModal } from "@/components/create-schedule-modal"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useAccount, useContract, useReadContract } from "@starknet-react/core"
+import { FACTORYABI } from "@/lib/abi/factory-abi"
+import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { COREABI } from "@/lib/abi/core-abi"
+import { contractAddressToHex } from "@/lib/utils"
 
 export default function SchedulesPage() {
   const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false)
@@ -21,6 +26,29 @@ export default function SchedulesPage() {
     date: "April 15, 2024",
     amount: "$18,700.00",
   }
+
+  const { address: user } = useAccount()
+
+  const { data: ContractAddresses } = useReadContract(
+    user ? {
+    abi: FACTORYABI,
+    address: LITTLEFINGER_FACTORY_ADDRESS,
+    functionName: "get_vault_org_pair",
+    args: [user!]
+  }: ({} as any))
+
+  const {
+    data: disbursementSchedules, isLoading: isLoadingDisbursementSchedules
+  } = useReadContract(
+    user ? {
+    abi: COREABI,
+    address: contractAddressToHex(ContractAddresses?.[0]),
+    functionName: "get_disbursement_schedules",
+    args: [],
+    watch: true,
+  }: ({} as any))
+
+  console.log(disbursementSchedules)
 
   const activeSchedules = [
     { id: 1, name: "Monthly Payroll", type: "Fixed", interval: "30 days", nextRun: "May 31, 2024", status: "Active" },
