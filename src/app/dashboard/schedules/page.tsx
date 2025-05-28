@@ -11,7 +11,8 @@ import { useAccount, useContract, useReadContract } from "@starknet-react/core"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
 import { COREABI } from "@/lib/abi/core-abi"
-import { contractAddressToHex } from "@/lib/utils"
+import { contractAddressToHex, timeStampToDate } from "@/lib/utils"
+import { CairoCustomEnum, CairoOption } from "starknet"
 
 export default function SchedulesPage() {
   const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false)
@@ -50,6 +51,58 @@ export default function SchedulesPage() {
 
   console.log(disbursementSchedules)
 
+  const {
+    data: currentDisbursementSchedule, isLoading: isLoadingCurrentDisbursementSchedule
+  } = useReadContract(
+  user? {
+    abi: COREABI,
+    address: contractAddressToHex(ContractAddresses?.[0]),
+    functionName: "get_current_schedule",
+    args: [],
+    watch: true,
+  } : ({} as any))
+
+  currentDisbursementSchedule && console.log(currentDisbursementSchedule)
+
+  const formattedDisbursementSchedule = () => {
+    if (!currentDisbursementSchedule) return
+
+    const endTimestamp = timeStampToDate(Number(currentDisbursementSchedule?.end_timestamp?.toString()));
+    const interval = Number(currentDisbursementSchedule?.interval) / 86400;
+    const now = Date.now();
+    // @ts-expect-error CairoOption problem
+    const lastExecution: CairoOption<number> = currentDisbursementSchedule?.last_execution;
+    const returnedLastExecution: number = lastExecution.Some || 0;
+    const scheduleId = Number(currentDisbursementSchedule?.schedule_id);
+    // @ts-expect-error CairoEnumProblem
+    const scheduleType: CairoCustomEnum = currentDisbursementSchedule?.schedule_type;
+    const returnedScheduleType = scheduleType?.activeVariant();
+    const startTimestamp = timeStampToDate(Number(currentDisbursementSchedule?.start_timestamp?.toString()));
+    let nextDate: Date | null = null;
+    if (returnedLastExecution > 0) {
+      nextDate = new Date(returnedLastExecution + (Number(currentDisbursementSchedule?.interval) * 1000));
+    } else {
+      nextDate = new Date(startTimestamp);
+    }
+
+    // Ensure next date doesn't exceed end timestamp
+    if (nextDate.getTime() > Number(endTimestamp)) {
+      nextDate = null;
+    }
+    // @ts-expect-error CairoEnum Problem
+    const status: CairoCustomEnum = currentDisbursementSchedule?.status;
+    const returnedStatus = status?.activeVariant();
+
+    return {
+      scheduleId, returnedScheduleType, startTimestamp, endTimestamp, interval, returnedLastExecution, returnedStatus, nextDate,
+      daysRemaining: nextDate ? 
+      Math.ceil((nextDate.getTime() - now) / (1000 * 60 * 60 * 24)) : 
+      0,
+    }
+  }
+
+  console.log(formattedDisbursementSchedule());
+
   const activeSchedules = [
     { id: 1, name: "Monthly Payroll", type: "Fixed", interval: "30 days", nextRun: "May 31, 2024", status: "Active" },
     {
@@ -74,41 +127,79 @@ export default function SchedulesPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Disbursement Schedules</h1>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Next Scheduled Disbursement</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <div className="mr-4 rounded-full bg-blue-100 p-2">
-                <CalendarIcon className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{nextScheduled.date}</div>
-                <p className="text-sm text-muted-foreground">in {nextScheduled.daysRemaining} days</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        { formattedDisbursementSchedule() ? (
+        <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Next Scheduled Disbursement</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-4 rounded-full bg-blue-100 p-2">
+                    <CalendarIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{(formattedDisbursementSchedule()?.nextDate)?.toDateString()}</div>
+                    <p className="text-sm text-muted-foreground">in {formattedDisbursementSchedule()?.daysRemaining} days</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Last Disbursement Completed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <div className="mr-4 rounded-full bg-green-100 p-2">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{lastCompleted.date}</div>
-                <p className="text-sm text-muted-foreground">{lastCompleted.amount} distributed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Last Disbursement Completed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-4 rounded-full bg-green-100 p-2">
+                    <CheckCircle2 className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{formattedDisbursementSchedule()?.returnedLastExecution == 0 ? 'Never' : formattedDisbursementSchedule()?.returnedLastExecution}</div>
+                    <p className="text-sm text-muted-foreground">{0} distributed</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+        </div>
+        ): (
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Next Scheduled Disbursement</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-4 rounded-full bg-blue-100 p-2">
+                    <CalendarIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{nextScheduled.date}</div>
+                    <p className="text-sm text-muted-foreground">in {nextScheduled.daysRemaining} days</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Last Disbursement Completed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="mr-4 rounded-full bg-green-100 p-2">
+                    <CheckCircle2 className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold">{lastCompleted.date}</div>
+                    <p className="text-sm text-muted-foreground">{lastCompleted.amount} distributed</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+        </div>
+        )}
 
       <div className="flex flex-wrap gap-4">
         <Button onClick={() => setIsCreateScheduleOpen(true)} className="bg-blue-600 hover:bg-blue-700">

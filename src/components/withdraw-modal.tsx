@@ -11,7 +11,7 @@ import { useAccount, useContract, useReadContract, useSendTransaction } from "@s
 import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
 import { VAULTABI } from "@/lib/abi/vault-abi"
-import { contractAddressToHex } from "@/lib/utils"
+import { contractAddressToHex, getUint256FromDecimal } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { AlertTriangle } from "lucide-react"
 
@@ -63,8 +63,10 @@ export function WithdrawModal({ open, onOpenChange }: WithdrawModalProps) {
 
     if (!isValid || !contract) return
 
+    const amountInU256 = getUint256FromDecimal(amount);
+
     return [
-        contract.populate("withdraw_funds", [Number(amount)])
+        contract.populate("withdraw_funds", [amountInU256, user!])
     ]
   }, [amount, user])
 

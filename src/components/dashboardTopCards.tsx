@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CalendarIcon, Users, Wallet } from "lucide-react"
 
 type DashboardTopCardsProps = {
-    vaultBalance: number,
+    vaultBalance: any,
     nextPayoutDate: string,
     activeMembers: number
 }

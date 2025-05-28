@@ -26,6 +26,7 @@ export function AddMemberModal({ open, onOpenChange }: AddMemberModalProps) {
     lastName: "",
     alias: "",
     role: "",
+    walletAddress: ""
   })
 
   const { address: user } = useAccount()
@@ -45,7 +46,7 @@ export function AddMemberModal({ open, onOpenChange }: AddMemberModalProps) {
   })
 
   const calls = useMemo(() => {
-    const inputIsValid = formData.firstName !== "" && formData.lastName !== "" && formData.alias !== "" && formData.role !== "" && user
+    const inputIsValid = formData.firstName !== "" && formData.lastName !== "" && formData.alias !== "" && formData.role !== "" && formData.walletAddress !== "" && user
     if (!inputIsValid || !contract || !user) return
 
     const roleValue = 1
@@ -53,11 +54,11 @@ export function AddMemberModal({ open, onOpenChange }: AddMemberModalProps) {
 
     return [
       contract.populate("add_member", [
-        formData.firstName, formData.lastName, formData.alias, roleEnum
+        formData.firstName, formData.lastName, formData.alias, roleEnum, formData.walletAddress
       ])
     ]
 
-  }, [formData.firstName, formData.lastName, formData.alias, formData.role, user])
+  }, [formData.firstName, formData.lastName, formData.alias, formData.role, user, formData.walletAddress])
 
   const {
     sendAsync, data, error, isPending, isError
@@ -110,6 +111,11 @@ export function AddMemberModal({ open, onOpenChange }: AddMemberModalProps) {
           <div className="space-y-2">
             <Label htmlFor="alias">Alias/Username*</Label>
             <Input id="alias" name="alias" value={formData.alias} onChange={handleChange} required />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="walletAddress">WalletAddress*</Label>
+            <Input id="walletAddress" name="walletAddress" value={formData.walletAddress} onChange={handleChange} required />
           </div>
 
           <div className="space-y-2">

@@ -12,8 +12,8 @@ import { useAccount, useReadContract } from "@starknet-react/core"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
 import { COREABI } from "@/lib/abi/core-abi"
-import { contractAddressToHex } from "@/lib/utils"
-import { CairoCustomEnum } from "starknet"
+import { contractAddressToHex, felt252ToString } from "@/lib/utils"
+import { CairoCustomEnum, uint256 } from "starknet"
 
 export default function MembersPage() {
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
@@ -53,10 +53,13 @@ export default function MembersPage() {
   //   let members = [];
   //   fromContract.forEach(() => {})
   // }
+  console.log(safeMembersFromContract)
   const formattedMembers = () => safeMembersFromContract.map((member, i) => {
     const firstName = member?.fname;
     const lastName = member?.lname;
     const alias = member?.alias;
+    const id = Number(uint256.uint256ToBN(member?.id));
+    console.log(id)
 
     const role: CairoCustomEnum = member?.role;
     const returnedRole = role.activeVariant();
@@ -65,7 +68,7 @@ export default function MembersPage() {
     const returnedStatus = status.activeVariant();
 
     return {
-      firstName, lastName, alias, returnedRole, returnedStatus
+      firstName, lastName, alias, returnedRole, returnedStatus, id
     }
   })
   console.log(formattedMembers())

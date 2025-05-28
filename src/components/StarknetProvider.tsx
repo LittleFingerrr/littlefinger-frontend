@@ -50,6 +50,7 @@ export function StarknetProvider({ children }: StarknetProviderProps) {
 
   return (
     <StarknetConfig
+    // @ts-expect-error connectors error
       connectors={connectors}
       chains={[mainnet, sepolia]}
       provider={
