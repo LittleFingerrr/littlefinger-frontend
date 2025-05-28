@@ -84,7 +84,7 @@ export function CreateScheduleModal({ open, onOpenChange }: CreateScheduleModalP
 
 
     return [
-      contract.populate("create_disbursement_schedule", [
+      contract.populate("initialize_disbursement_schedule", [
         parseInt(formData.scheduleType), startTimestamp, endTimestamp, intervalInSeconds
       ])
     ]

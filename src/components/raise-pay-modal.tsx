@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { useAccount, useContract, useReadContract, useSendTransaction } from "@starknet-react/core"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
-import { contractAddressToHex, felt252ToString } from "@/lib/utils"
+import { contractAddressToHex, felt252ToString, getUint256FromDecimal } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { TrendingUp, User, DollarSign } from "lucide-react"
 import { COREABI } from "@/lib/abi/core-abi"
@@ -47,23 +47,27 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
     }
   )
 
-    const updatePayCalls = useMemo(() => {
-        const isValid = amount !== "" && !Number.isNaN(amount)
+    const calls = useMemo(() => {
+        const isValid = amount !== "" && !Number.isNaN(amount);
 
-        if (!isValid || !contract || !user) return
+        if (!contract || !isValid) return
+
+        const id = Number(member?.id)
+
+        const amountInU256 = getUint256FromDecimal(amount);
 
         return [
-            contract.populate("update_member_base_pay", [member?.id, Number(amount)])
+            contract.populate("update_member_base_pay", [id, amountInU256])
         ]
-    }, [contract, user])
+    }, [amount, user, contract])
 
-    const { sendAsync: updatePay } = useSendTransaction({ calls: updatePayCalls })    
+    const { sendAsync } = useSendTransaction({ calls })    
 
   // Get member details
   const memberName = member ? `${felt252ToString(member?.firstName)} ${felt252ToString(member?.lastName)}` : ""
   const memberAlias = member ? felt252ToString(member?.alias) : ""
   const memberRole = member?.returnedRole || ""
-  const currentBasePay = member?.basePay || 0 // Assuming basePay is available in member data
+//   const currentBasePay = member?.basePay || 0 // Assuming basePay is available in member data
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -73,66 +77,11 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
     }
   }
 
-  // Calculate new base pay
-  const newBasePay = Number.parseFloat(currentBasePay.toString()) + (Number.parseFloat(amount) || 0)
-  const percentageIncrease =
-    currentBasePay > 0 ? ((Number.parseFloat(amount) || 0) / Number.parseFloat(currentBasePay.toString())) * 100 : 0
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!amount || Number.parseFloat(amount) <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid amount greater than 0",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!contract) {
-      toast({
-        title: "Contract Not Found",
-        description: "Unable to connect to organization contract",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsSubmitting(true)
+  const handlePay = async () => {
     try {
-      // Convert new pay to the appropriate format for the contract
-      await updatePay();
-
-      // Call the update member base pay function on the contract
-
-      // Execute the transaction
-      console.log("Updating member base pay:", {
-        memberId: member?.id,
-        memberName,
-        currentPay: currentBasePay,
-        newPay: newBasePay,
-        increase: amount,
-        // call,
-      })
-
-      toast({
-        title: "Pay Raise Initiated",
-        description: `Updating ${memberName}'s base pay to ${newBasePay.toFixed(4)} ETH`,
-      })
-
-      // Reset form and close modal
-      setAmount("")
-      onOpenChange(false)
-    } catch (error) {
-      console.error("Error updating member base pay:", error)
-      toast({
-        title: "Pay Update Failed",
-        description: "There was an error updating the member's base pay. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmitting(false)
+        await sendAsync();
+    } catch (err) {
+        console.error(err)
     }
   }
 
@@ -143,7 +92,7 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
     }
   }
 
-  if (!member) return null
+//   if (!member) return null
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -172,12 +121,12 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
             <DollarSign className="h-4 w-4 text-blue-600" />
             <span className="text-blue-800">
               Current Base Pay:{" "}
-              <span className="font-medium">{Number.parseFloat(currentBasePay.toString()).toFixed(4)} ETH</span>
+              {/* <span className="font-medium">{Number.parseFloat(currentBasePay.toString()).toFixed(4)} ETH</span> */}
             </span>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form className="space-y-4" onSubmit={handlePay}>
           <div className="space-y-2">
             <Label htmlFor="amount">Increase Amount (ETH)*</Label>
             <div className="relative">
@@ -201,23 +150,23 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
             <div className="rounded-lg bg-green-50 p-4 border border-green-200">
               <h4 className="font-medium text-green-900 mb-2">Pay Adjustment Summary</h4>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span className="text-green-700">Current Base Pay:</span>
-                  <span className="font-medium">{Number.parseFloat(currentBasePay.toString()).toFixed(4)} ETH</span>
+                  <span className="font-medium">{Number.parseFloat(currentBasePay.toString()).toFixed(4)} STRK</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700">Increase Amount:</span>
-                  <span className="font-medium text-green-600">+{Number.parseFloat(amount).toFixed(4)} ETH</span>
+                  <span className="font-medium text-green-600">+{Number.parseFloat(amount).toFixed(4)} STRK</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700">Percentage Increase:</span>
                   <span className="font-medium text-green-600">+{percentageIncrease.toFixed(2)}%</span>
-                </div>
-                <hr className="border-green-200" />
+                </div> */}
+                {/* <hr className="border-green-200" />
                 <div className="flex justify-between font-medium">
                   <span className="text-green-800">New Base Pay:</span>
                   <span className="text-green-800">{newBasePay.toFixed(4)} ETH</span>
-                </div>
+                </div> */}
               </div>
             </div>
           )}
@@ -229,6 +178,7 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
             <Button
               type="submit"
               className="bg-green-600 hover:bg-green-700"
+            //   onClick={handlePay}
               disabled={!amount || Number.parseFloat(amount) <= 0 || isSubmitting}
             >
               {isSubmitting ? "Processing..." : "Confirm Pay Raise"}
