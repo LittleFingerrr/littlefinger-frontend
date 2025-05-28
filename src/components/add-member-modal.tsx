@@ -76,7 +76,7 @@ export function AddMemberModal({ open, onOpenChange }: AddMemberModalProps) {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // e.preventDefault()
+    e.preventDefault()
     if (!calls) return
     console.log("Adding member:", formData)
     

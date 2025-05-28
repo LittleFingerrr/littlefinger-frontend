@@ -136,7 +136,9 @@ export default function Dashboard() {
     args: []
   } : {} as any)
 
-  console.log(disbursementSchedule)
+  // console.log(disbursementSchedule)
+  console.log(vaultAddress)
+  // console.log(orgAddress)
 
   const lastExecution = disbursementSchedule?.last_execution;
   const interval = disbursementSchedule?.interval;
