@@ -11,10 +11,12 @@ import { WithdrawModal } from "@/components/withdraw-modal"
 import { FreezeModal } from "@/components/freeze-modal"
 import { useAccount, useContract, useReadContract, useSendTransaction } from "@starknet-react/core"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants"
 import { VAULTABI } from "@/lib/abi/vault-abi"
 import { contractAddressToHex } from "@/lib/utils"
 import { COREABI } from "@/lib/abi/core-abi"
+import { CairoCustomEnum } from "starknet"
+import { ERC20ABI } from "@/lib/abi/token-abi"
 
 export default function VaultPage() {
   const [isPayMemberOpen, setIsPayMemberOpen] = useState(false)
@@ -40,14 +42,30 @@ export default function VaultPage() {
   const { data: contractVaultBalance, isLoading: vaultBalanceIsLoading } = useReadContract(
     user
       ? {
-          abi: VAULTABI,
-          address: contractAddressToHex(ContractAddresses?.[1]),
-          functionName: "get_balance",
-          args: [],
+          abi: ERC20ABI,
+          address: STARKGATE_STRK_ADDRESS,
+          functionName: "balance_of",
+          args: [contractAddressToHex(ContractAddresses?.[1])],
           watch: true,
         }
       : ({} as any),
   )
+
+  const { data: contractVaultStatus, isLoading: vaultStatusIsLoading } = useReadContract(
+    user?
+        {
+          abi: VAULTABI,
+          address: contractAddressToHex(ContractAddresses?.[1]),
+          functionName: "get_vault_status",
+          args: [],
+          watch: true,
+        }
+    : ({} as any)
+  )
+  // @ts-expect-error CairoEnum Problem
+  const pseudoVaultStatus: CairoCustomEnum = contractVaultStatus;
+  const finalStatus = pseudoVaultStatus?.activeVariant();
+  console.log(finalStatus)
 
   const { contract } = useContract({
     abi: COREABI,
@@ -110,7 +128,7 @@ export default function VaultPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-3xl font-bold">
-                  {vaultBalanceIsLoading ? "Loading..." : `${formatBalance(contractVaultBalance)} ETH`}
+                  {vaultBalanceIsLoading ? "Loading..." : `${formatBalance(contractVaultBalance)} STRK`}
                 </span>
                 {contractVaultBalance && (
                   <span className="text-sm text-muted-foreground">Raw: {Number(contractVaultBalance).toString()}</span>
@@ -147,7 +165,7 @@ export default function VaultPage() {
           className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
           onClick={() => setIsFreezeOpen(true)}
         >
-          Emergency Freeze
+          {finalStatus == "VAULTRESUMED" ? "Emergency Freeze" : "Unfreeze"}
         </Button>
         <Button variant="outline" onClick={handlePayment} disabled={isPaying}>
           Payout
@@ -217,7 +235,7 @@ export default function VaultPage() {
       {/* <PayMemberModal open={isPayMemberOpen} onOpenChange={setIsPayMemberOpen} /> */}
       <DepositModal open={isDepositOpen} onOpenChange={setIsDepositOpen} />
       <WithdrawModal open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen} />
-      <FreezeModal open={isFreezeOpen} onOpenChange={setIsFreezeOpen} />
+      <FreezeModal open={isFreezeOpen} onOpenChange={setIsFreezeOpen} vaultStatus={finalStatus}/>
     </div>
   )
 }

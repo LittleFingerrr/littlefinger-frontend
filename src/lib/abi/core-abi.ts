@@ -278,6 +278,10 @@ export const COREABI = [
           {
             "name": "role",
             "type": "littlefinger::structs::member_structs::MemberRole"
+          },
+          {
+            "name": "address",
+            "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
         "outputs": [],
@@ -437,6 +441,26 @@ export const COREABI = [
           {
             "name": "config",
             "type": "littlefinger::structs::member_structs::MemberConfig"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "record_member_payment",
+        "inputs": [
+          {
+            "name": "member_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "amount",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "timestamp",
+            "type": "core::integer::u64"
           }
         ],
         "outputs": [],

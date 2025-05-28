@@ -17,10 +17,11 @@ import { AlertTriangle, Shield } from "lucide-react"
 
 interface FreezeModalProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange: (open: boolean) => void,
+  vaultStatus: string
 }
 
-export function FreezeModal({ open, onOpenChange }: FreezeModalProps) {
+export function FreezeModal({ open, onOpenChange, vaultStatus }: FreezeModalProps) {
   const [reason, setReason] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -46,7 +47,7 @@ export function FreezeModal({ open, onOpenChange }: FreezeModalProps) {
     }
   )
 
-  const calls = useMemo(() => {
+  const freezeCalls = useMemo(() => {
     if (!contract) return
 
     return [
@@ -54,7 +55,17 @@ export function FreezeModal({ open, onOpenChange }: FreezeModalProps) {
     ]
   }, [user, contract])
 
-  const { sendAsync } = useSendTransaction({ calls })
+  const unfreezeCalls = useMemo(() => {
+    if (!contract) return
+
+    return [
+        contract.populate("unfreeze_vault", [])
+    ]
+  }, [user, contract])
+
+  const { sendAsync: FreezeAsync } = useSendTransaction({ calls: freezeCalls })
+
+  const { sendAsync: unFreezeAsync } = useSendTransaction({ calls: unfreezeCalls })
 
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setReason(e.target.value)
@@ -86,8 +97,13 @@ export function FreezeModal({ open, onOpenChange }: FreezeModalProps) {
       // Call the emergency freeze function on the contract
 
       // Execute the transaction
-      console.log("Emergency freezing vault:", { reason })
-      await sendAsync();
+      if (vaultStatus == "VAULTRESUMED") {
+        console.log("Emergency freezing vault:", { reason })
+        await FreezeAsync();
+      } else {
+        console.log("Unfreezing vault", { reason });
+        await unFreezeAsync();
+      }
 
       toast({
         title: "Emergency Freeze Initiated",

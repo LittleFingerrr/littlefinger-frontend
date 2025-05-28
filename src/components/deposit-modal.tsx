@@ -9,10 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useAccount, useContract, useReadContract, useSendTransaction } from "@starknet-react/core"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants"
 import { VAULTABI } from "@/lib/abi/vault-abi"
-import { contractAddressToHex } from "@/lib/utils"
+import { contractAddressToHex, getUint256FromDecimal } from "@/lib/utils"
 import { toast } from "@/hooks/use-toast"
+import { ERC20ABI } from "@/lib/abi/token-abi"
 
 interface DepositModalProps {
   open: boolean
@@ -37,26 +38,46 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
       : ({} as any),
   )
 
-  const { contract } = useContract(
+  const { contract: VaultContract } = useContract(
     {
         abi: VAULTABI,
         address: contractAddressToHex(ContractAddresses?.[1]),
     }
   )
 
-  const calls = useMemo(() => {
+  const { contract: ERC20Contract } = useContract({
+    abi: ERC20ABI,
+    address: STARKGATE_STRK_ADDRESS,
+  })
+
+  const VaultCalls = useMemo(() => {
     const isValid = amount !== "" && !Number.isNaN(amount)
 
-    if (!isValid || !contract) return
+    if (!isValid || !VaultContract) return
 
-    return [
-        contract?.populate("deposit_funds", [Number(amount)])
-    ]
+    const amountInU256 = getUint256FromDecimal(amount);
+
+    return VaultContract.populate("deposit_funds", [amountInU256, user!])
+  }, [amount, user])
+
+  const erc20Calls = useMemo(() => {
+    const isValid = amount !== "" && !Number.isNaN(amount)
+    if (!ERC20Contract || !isValid) return
+
+    const amountInU256 = getUint256FromDecimal(amount);
+
+    return ERC20Contract.populate("approve", [contractAddressToHex(ContractAddresses?.[1]), amountInU256])
   }, [amount, user])
 
   const {
     sendAsync, isPending
-  } = useSendTransaction({ calls })
+  } = useSendTransaction(
+    erc20Calls && VaultCalls ? {
+    calls: [
+      erc20Calls!,
+      VaultCalls!
+    ]
+  }: ({} as any))
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
@@ -70,7 +91,7 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
     e.preventDefault();
 
     try {
-        console.log(calls);
+        console.log(erc20Calls, VaultCalls);
         await sendAsync();
     } catch (err) {
         console.error(err)

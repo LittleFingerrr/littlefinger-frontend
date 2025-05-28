@@ -124,7 +124,7 @@ export default function Dashboard() {
     args: []
   } : ({} as any))
 
-  console.log((members as Array<any>)?.length);
+  // console.log((members as Array<any>)?.length);
 
   const {
     data: disbursementSchedule, error: disbursementScheduleError
@@ -156,7 +156,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <DashboardTopCards vaultBalance={Number?.(vaultBalance)} activeMembers={members?.length as number} nextPayoutDate={nextPayoutDate}/>
+      <DashboardTopCards vaultBalance={(Number?.(vaultBalance) / 10 ** 18).toFixed(3)} activeMembers={Number(members?.length.toString())} nextPayoutDate={nextPayoutDate}/>
 
       {/* History */}
       <Card>

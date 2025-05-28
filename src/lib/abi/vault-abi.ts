@@ -20,15 +20,67 @@ export const VAULTABI = [
   },
   {
     "type": "enum",
-    "name": "core::bool",
+    "name": "littlefinger::structs::vault_structs::VaultStatus",
     "variants": [
       {
-        "name": "False",
+        "name": "VAULTRESUMED",
         "type": "()"
       },
       {
-        "name": "True",
+        "name": "VAULTFROZEN",
         "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "littlefinger::structs::vault_structs::TransactionType",
+    "variants": [
+      {
+        "name": "DEPOSIT",
+        "type": "()"
+      },
+      {
+        "name": "WITHDRAWAL",
+        "type": "()"
+      },
+      {
+        "name": "PAYMENT",
+        "type": "()"
+      },
+      {
+        "name": "BONUS_ALLOCATION",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::vault_structs::Transaction",
+    "members": [
+      {
+        "name": "transaction_type",
+        "type": "littlefinger::structs::vault_structs::TransactionType"
+      },
+      {
+        "name": "token",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "amount",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "tx_hash",
+        "type": "core::felt252"
+      },
+      {
+        "name": "caller",
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
@@ -43,6 +95,10 @@ export const VAULTABI = [
           {
             "name": "amount",
             "type": "core::integer::u256"
+          },
+          {
+            "name": "address",
+            "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
         "outputs": [],
@@ -55,6 +111,10 @@ export const VAULTABI = [
           {
             "name": "amount",
             "type": "core::integer::u256"
+          },
+          {
+            "name": "address",
+            "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
         "outputs": [],
@@ -87,11 +147,23 @@ export const VAULTABI = [
             "type": "core::integer::u256"
           }
         ],
-        "outputs": [
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "add_to_bonus_allocation",
+        "inputs": [
           {
-            "type": "core::bool"
+            "name": "amount",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "address",
+            "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
+        "outputs": [],
         "state_mutability": "external"
       },
       {
@@ -107,6 +179,17 @@ export const VAULTABI = [
       },
       {
         "type": "function",
+        "name": "get_vault_status",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "littlefinger::structs::vault_structs::VaultStatus"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "get_bonus_allocation",
         "inputs": [],
         "outputs": [
@@ -115,6 +198,89 @@ export const VAULTABI = [
           }
         ],
         "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_transaction_history",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<littlefinger::structs::vault_structs::Transaction>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "allow_org_core_address",
+        "inputs": [
+          {
+            "name": "org_address",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "type": "impl",
+    "name": "OwnableMixinImpl",
+    "interface_name": "openzeppelin_access::ownable::interface::OwnableABI"
+  },
+  {
+    "type": "interface",
+    "name": "openzeppelin_access::ownable::interface::OwnableABI",
+    "items": [
+      {
+        "type": "function",
+        "name": "owner",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "transfer_ownership",
+        "inputs": [
+          {
+            "name": "new_owner",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "renounce_ownership",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "transferOwnership",
+        "inputs": [
+          {
+            "name": "newOwner",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "renounceOwnership",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
       }
     ]
   },
@@ -133,6 +299,10 @@ export const VAULTABI = [
       {
         "name": "bonus_allocation",
         "type": "core::integer::u256"
+      },
+      {
+        "name": "owner",
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
@@ -225,50 +395,6 @@ export const VAULTABI = [
     ]
   },
   {
-    "type": "enum",
-    "name": "littlefinger::structs::vault_structs::TransactionType",
-    "variants": [
-      {
-        "name": "DEPOSIT",
-        "type": "()"
-      },
-      {
-        "name": "WITHDRAWAL",
-        "type": "()"
-      }
-    ]
-  },
-  {
-    "type": "struct",
-    "name": "littlefinger::structs::vault_structs::Transaction",
-    "members": [
-      {
-        "name": "transaction_type",
-        "type": "littlefinger::structs::vault_structs::TransactionType"
-      },
-      {
-        "name": "token",
-        "type": "core::starknet::contract_address::ContractAddress"
-      },
-      {
-        "name": "amount",
-        "type": "core::integer::u256"
-      },
-      {
-        "name": "timestamp",
-        "type": "core::integer::u64"
-      },
-      {
-        "name": "tx_hash",
-        "type": "core::felt252"
-      },
-      {
-        "name": "caller",
-        "type": "core::starknet::contract_address::ContractAddress"
-      }
-    ]
-  },
-  {
     "type": "event",
     "name": "littlefinger::contracts::vault::Vault::TransactionRecorded",
     "kind": "struct",
@@ -292,6 +418,98 @@ export const VAULTABI = [
         "name": "token",
         "type": "core::starknet::contract_address::ContractAddress",
         "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "littlefinger::contracts::vault::Vault::BonusAllocation",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "amount",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "OwnershipTransferred",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
+        "kind": "nested"
+      },
+      {
+        "name": "OwnershipTransferStarted",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+        "kind": "nested"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "class_hash",
+        "type": "core::starknet::class_hash::ClassHash",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+    "kind": "enum",
+    "variants": [
+      {
+        "name": "Upgraded",
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+        "kind": "nested"
       }
     ]
   },
@@ -324,6 +542,21 @@ export const VAULTABI = [
         "name": "TransactionRecorded",
         "type": "littlefinger::contracts::vault::Vault::TransactionRecorded",
         "kind": "nested"
+      },
+      {
+        "name": "BonusAllocation",
+        "type": "littlefinger::contracts::vault::Vault::BonusAllocation",
+        "kind": "nested"
+      },
+      {
+        "name": "OwnableEvent",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+        "kind": "flat"
+      },
+      {
+        "name": "UpgradeableEvent",
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+        "kind": "flat"
       }
     ]
   }
