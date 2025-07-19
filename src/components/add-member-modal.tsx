@@ -49,12 +49,12 @@ export function AddMemberModal({ open, onOpenChange }: AddMemberModalProps) {
     const inputIsValid = formData.firstName !== "" && formData.lastName !== "" && formData.alias !== "" && formData.role !== "" && formData.walletAddress !== "" && user
     if (!inputIsValid || !contract || !user) return
 
-    const roleValue = 1
+    const roleValue = 9
     const roleEnum = new CairoCustomEnum({EMPLOYEE: roleValue})
 
     return [
       contract.populate("add_member", [
-        formData.firstName, formData.lastName, formData.alias, roleEnum, formData.walletAddress
+        formData.firstName, formData.lastName, formData.alias, roleValue, formData.walletAddress
       ])
     ]
 

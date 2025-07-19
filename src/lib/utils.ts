@@ -71,3 +71,7 @@ export const getUint256FromDecimal = (decimalAmount: string) => {
     throw new Error('Invalid amount format')
   }
 }
+
+export const shortenAddress = (address: `0x${string}`) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};

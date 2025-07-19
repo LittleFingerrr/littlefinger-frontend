@@ -99,7 +99,7 @@ export function MemberTableRow({ member }: MemberTableRowProps) {
         </TableCell>
         </TableRow>
 
-        <RaisePayModal open={isRaisePayOpen} onOpenChange={setIsRaisePayOpen} member={member} />
+        <RaisePayModal open={isRaisePayOpen} onOpenChange={setIsRaisePayOpen} member={member} id={memberId} />
     </>
   )
 }

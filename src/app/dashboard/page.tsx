@@ -4,21 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DashboardTopCards } from "@/components/dashboardTopCards"
-import { useContracts, useHasOrganization, useOrgAddress, useVaultAddress } from "@/components/contract-provider"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, Plus } from "lucide-react"
-import Link from "next/link"
 import { useAccount, useConnect, useReadContract } from "@starknet-react/core"
 import { VAULTABI } from "@/lib/abi/vault-abi"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
-import { contractAddressToHex, felt252ToString } from "@/lib/utils"
+import { contractAddressToHex, felt252ToString, shortenAddress } from "@/lib/utils"
 import { COREABI } from "@/lib/abi/core-abi"
+import { CopyIcon } from "lucide-react"
+import CopyButton from "@/components/copy-button"
 
 export default function Dashboard() {
-  const { addresses, isLoading, error } = useContracts()
-  const { hasOrganization } = useHasOrganization()
-
   const { address: user } = useAccount()
   const {  } = useConnect()
 
@@ -34,71 +29,12 @@ export default function Dashboard() {
       args: [user!],
       // enabled: !!address && isConnected,
     })
-
-  // Mock data for dashboard
+    
   const recentDisbursements = [
     { id: 1, date: "May 15, 2024", amount: "$18,700.00", recipients: 38, status: "Completed" },
     { id: 2, date: "Apr 15, 2024", amount: "$18,700.00", recipients: 38, status: "Completed" },
     { id: 3, date: "Mar 15, 2024", amount: "$17,500.00", recipients: 35, status: "Completed" },
   ]
-
-  // if (isLoading) {
-  //   return (
-  //     <div className="space-y-6">
-  //       <h1 className="text-2xl font-bold">Dashboard</h1>
-  //       <div className="flex items-center justify-center h-64">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-  //           <p className="text-muted-foreground">Loading your organization...</p>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
-  // if (error) {
-  //   return (
-  //     <div className="space-y-6">
-  //       <h1 className="text-2xl font-bold">Dashboard</h1>
-  //       <Alert variant="destructive">
-  //         <AlertCircle className="h-4 w-4" />
-  //         <AlertTitle>Error</AlertTitle>
-  //         <AlertDescription>{error}</AlertDescription>
-  //       </Alert>
-  //     </div>
-  //   )
-  // }
-
-  // if (!hasOrganization) {
-  //   return (
-  //     <div className="space-y-6">
-  //       <h1 className="text-2xl font-bold">Dashboard</h1>
-  //       <Alert>
-  //         <AlertCircle className="h-4 w-4" />
-  //         <AlertTitle>No Organization Found</AlertTitle>
-  //         <AlertDescription>
-  //           You haven't created an organization yet. Create one to get started with managing your team and funds.
-  //         </AlertDescription>
-  //       </Alert>
-  //       <Card>
-  //         <CardContent className="pt-6">
-  //           <div className="text-center space-y-4">
-  //             <h3 className="text-lg font-semibold">Get Started</h3>
-  //             <p className="text-muted-foreground">
-  //               Create your organization to start managing members, schedules, and disbursements.
-  //             </p>
-  //             <Button asChild className="bg-blue-600 hover:bg-blue-700">
-  //               <Link href="/">
-  //                 <Plus className="mr-2 h-4 w-4" />
-  //                 Create Organization
-  //               </Link>
-  //             </Button>
-  //           </div>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   )
-  // }
 
   const orgAddress = contractAddressToHex(contractAddresses?.[0]);
   const vaultAddress = contractAddressToHex(contractAddresses?.[1]);
@@ -136,29 +72,28 @@ export default function Dashboard() {
     args: []
   } : {} as any)
 
-  // console.log(disbursementSchedule)
-  console.log(vaultAddress)
-  // console.log(orgAddress)
-
   const lastExecution = disbursementSchedule?.last_execution;
   const interval = disbursementSchedule?.interval;
-  let nextPayoutDate = "";
-
-  if (Number(interval) === 0) {
-    nextPayoutDate = "Unset"
-  }
+  const nextPayoutDate = (Number(interval)) / 86400;
+  console.log(nextPayoutDate)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <div className="text-sm text-muted-foreground">
-          <p>Vault: {vaultAddress?.slice(0, 10)}...</p>
-          <p>Org: {orgAddress?.slice(0, 10)}...</p>
+        <div className="text-sm text-muted-foreground flex flex-col gap-3">
+          <p className="flex items-center gap-3 justify-normal">
+            Vault Address: {shortenAddress(vaultAddress)}
+            <CopyButton copyText={vaultAddress} className="text-xs"/>
+          </p>
+          <p className="flex items-center gap-3 justify-normal">
+            Org Address: {shortenAddress(orgAddress)}
+            <CopyButton copyText={orgAddress} className="" />
+          </p>
         </div>
       </div>
 
-      <DashboardTopCards vaultBalance={(Number?.(vaultBalance) / 10 ** 18).toFixed(3)} activeMembers={Number(members?.length.toString())} nextPayoutDate={nextPayoutDate}/>
+      <DashboardTopCards vaultBalance={(Number?.(vaultBalance) / 10 ** 18).toFixed(3)} activeMembers={Number(members?.length.toString())} nextPayoutDate={`${nextPayoutDate.toString()} Days`}/>
 
       {/* History */}
       <Card>
@@ -177,9 +112,9 @@ export default function Dashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentDisbursements.map((disbursement) => (
-                <TableRow key={disbursement.id}>
-                  <TableCell>{disbursement.date}</TableCell>
+              {[].length > 0 ? [].map((_, index) => (
+                <TableRow key={index}>
+                  {/* <TableCell>{disbursement.date}</TableCell>
                   <TableCell>{disbursement.amount}</TableCell>
                   <TableCell>{disbursement.recipients}</TableCell>
                   <TableCell>
@@ -191,9 +126,13 @@ export default function Dashboard() {
                     <Button variant="ghost" size="sm">
                       View Details
                     </Button>
-                  </TableCell>
+                  </TableCell> */}
                 </TableRow>
-              ))}
+              )) : 
+                <div className="text-center mt-6 font-semibold uppercase">
+                  No recent disbursements
+                </div>
+              }
             </TableBody>
           </Table>
         </CardContent>

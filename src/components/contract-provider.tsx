@@ -50,7 +50,7 @@ export function ContractProvider({ children }: { children: React.ReactNode }) {
     enabled: !!address && isConnected,
   })
 
-  console.log(contractAddresses)
+  // console.log(contractAddresses)
 
   // Load addresses from localStorage on mount
   useEffect(() => {

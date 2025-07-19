@@ -1,16 +1,16 @@
 export const FACTORYABI = [
   {
-    "type": "impl",
     "name": "UpgradeableImpl",
+    "type": "impl",
     "interface_name": "openzeppelin_upgrades::interface::IUpgradeable"
   },
   {
-    "type": "interface",
     "name": "openzeppelin_upgrades::interface::IUpgradeable",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "upgrade",
+        "type": "function",
         "inputs": [
           {
             "name": "new_class_hash",
@@ -23,13 +23,13 @@ export const FACTORYABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "FactoryImpl",
+    "type": "impl",
     "interface_name": "littlefinger::interfaces::ifactory::IFactory"
   },
   {
-    "type": "struct",
     "name": "core::integer::u256",
+    "type": "struct",
     "members": [
       {
         "name": "low",
@@ -42,8 +42,8 @@ export const FACTORYABI = [
     ]
   },
   {
-    "type": "struct",
     "name": "core::byte_array::ByteArray",
+    "type": "struct",
     "members": [
       {
         "name": "data",
@@ -60,12 +60,12 @@ export const FACTORYABI = [
     ]
   },
   {
-    "type": "interface",
     "name": "littlefinger::interfaces::ifactory::IFactory",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "setup_org",
+        "type": "function",
         "inputs": [
           {
             "name": "available_funds",
@@ -106,6 +106,10 @@ export const FACTORYABI = [
           {
             "name": "first_admin_alias",
             "type": "core::felt252"
+          },
+          {
+            "name": "organization_type",
+            "type": "core::integer::u8"
           }
         ],
         "outputs": [
@@ -116,8 +120,8 @@ export const FACTORYABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "get_deployed_vaults",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -127,8 +131,8 @@ export const FACTORYABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "get_deployed_org_cores",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -138,8 +142,8 @@ export const FACTORYABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "get_vault_org_pair",
+        "type": "function",
         "inputs": [
           {
             "name": "caller",
@@ -154,8 +158,8 @@ export const FACTORYABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "update_vault_hash",
+        "type": "function",
         "inputs": [
           {
             "name": "vault_hash",
@@ -166,8 +170,8 @@ export const FACTORYABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "update_core_hash",
+        "type": "function",
         "inputs": [
           {
             "name": "core_hash",
@@ -180,17 +184,17 @@ export const FACTORYABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "OwnableMixinImpl",
+    "type": "impl",
     "interface_name": "openzeppelin_access::ownable::interface::OwnableABI"
   },
   {
-    "type": "interface",
     "name": "openzeppelin_access::ownable::interface::OwnableABI",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "owner",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -200,8 +204,8 @@ export const FACTORYABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "transfer_ownership",
+        "type": "function",
         "inputs": [
           {
             "name": "new_owner",
@@ -212,15 +216,15 @@ export const FACTORYABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "renounce_ownership",
+        "type": "function",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "transferOwnership",
+        "type": "function",
         "inputs": [
           {
             "name": "newOwner",
@@ -231,8 +235,8 @@ export const FACTORYABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "renounceOwnership",
+        "type": "function",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"
@@ -240,8 +244,8 @@ export const FACTORYABI = [
     ]
   },
   {
-    "type": "constructor",
     "name": "constructor",
+    "type": "constructor",
     "inputs": [
       {
         "name": "owner",
@@ -258,138 +262,138 @@ export const FACTORYABI = [
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "key",
         "name": "previous_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "key",
         "name": "new_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "key",
         "name": "previous_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "key",
         "name": "new_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "enum",
     "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-    "kind": "enum",
+    "type": "event",
     "variants": [
       {
+        "kind": "nested",
         "name": "OwnershipTransferred",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-        "kind": "nested"
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred"
       },
       {
+        "kind": "nested",
         "name": "OwnershipTransferStarted",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-        "kind": "nested"
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "data",
         "name": "class_hash",
-        "type": "core::starknet::class_hash::ClassHash",
-        "kind": "data"
+        "type": "core::starknet::class_hash::ClassHash"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "enum",
     "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
-    "kind": "enum",
+    "type": "event",
     "variants": [
       {
+        "kind": "nested",
         "name": "Upgraded",
-        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-        "kind": "nested"
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "littlefinger::contracts::factory::Factory::VaultDeployed",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "data",
         "name": "address",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "data",
         "name": "deployed_at",
-        "type": "core::integer::u64",
-        "kind": "data"
+        "type": "core::integer::u64"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "littlefinger::contracts::factory::Factory::OrgCoreDeployed",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "data",
         "name": "address",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "data",
         "name": "deployed_at",
-        "type": "core::integer::u64",
-        "kind": "data"
+        "type": "core::integer::u64"
       }
     ]
   },
   {
-    "type": "event",
-    "name": "littlefinger::contracts::factory::Factory::Event",
     "kind": "enum",
+    "name": "littlefinger::contracts::factory::Factory::Event",
+    "type": "event",
     "variants": [
       {
+        "kind": "flat",
         "name": "OwnableEvent",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-        "kind": "flat"
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event"
       },
       {
+        "kind": "flat",
         "name": "UpgradeableEvent",
-        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
-        "kind": "flat"
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event"
       },
       {
+        "kind": "nested",
         "name": "VaultDeployed",
-        "type": "littlefinger::contracts::factory::Factory::VaultDeployed",
-        "kind": "nested"
+        "type": "littlefinger::contracts::factory::Factory::VaultDeployed"
       },
       {
+        "kind": "nested",
         "name": "OrgCoreDeployed",
-        "type": "littlefinger::contracts::factory::Factory::OrgCoreDeployed",
-        "kind": "nested"
+        "type": "littlefinger::contracts::factory::Factory::OrgCoreDeployed"
       }
     ]
   }

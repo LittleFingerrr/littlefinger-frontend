@@ -15,12 +15,12 @@ import { WalletButton } from "./wallet-button"
 import { z } from 'zod'
 import { OrganizationMetadata, pinataService } from "@/lib/pinata"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants"
 import { byteArray, CairoOption, CairoOptionVariant, CallData } from "starknet"
+import { contractAddressToHex } from "@/lib/utils"
 
 export function RegistrationForm() {
-  const { isConnected } = useAccount()
-  const router = useRouter()
+  const { push } = useRouter()
   const [formData, setFormData] = useState({
     organizationName: "",
     email: "",
@@ -28,26 +28,12 @@ export function RegistrationForm() {
     description: "",
     adminLastName: "",
     adminAlias: "",
-    owner: "",
-    token: "",
-    ipfsUrl: "",
-    availableFunds: "",
-    bonusAllocation: ""
+    // owner: "",
+    // token: "",
+    // ipfsUrl: "",
+    // availableFunds: "",
+    // bonusAllocation: ""
   });
-
-  // const orgRegistrationSchema = z.object({
-  //   orgName: z.string().min(1, "Name cannot be empty"),
-  //   description: z.string().min(10, "Must be more than 10 characters"),
-  //   email: z.string().email('Invalid email format'),
-  //   firstAdminName: z.string().min(1, "Cannot be empty"),
-  //   firstAdminLastName: z.string().min(1, 'Cannot be empty'),
-  //   firstAdminAlias: z.string().min(1, "Cannot be empty"),
-  //   owner: z.string().optional(),
-  //   token: z.string().min(1, "Cannot be empty"),
-  //   ipfsUrl: z.string().min(1, "Cannot be empty"),
-  //   availableFunds: z.number(),
-  //   bonusAllocation: z.number(),
-  // })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -57,10 +43,8 @@ export function RegistrationForm() {
   }
 
   const {
-    address: user
+    address: user, isConnected
   } = useAccount()
-
-  console.log(user)
 
   const { contract } = useContract({
     abi: FACTORYABI,
@@ -73,37 +57,32 @@ export function RegistrationForm() {
 
   const calls = useMemo(() => {
     const inputIsValid = formData.organizationName !== "" && formData.email !== "" && formData.adminFirstName !== "" && formData.description !== "" 
-                          && formData.adminLastName !== "" && formData.adminAlias !== "" && formData.owner !== "" && formData.token !== ""
-                          && formData.ipfsUrl !== "" && formData.availableFunds !== "" && Number(formData.availableFunds) !== null
-                          && Number(formData.bonusAllocation) !== null
+                          && formData.adminLastName !== "" && formData.adminAlias !== "";
 
     if (!inputIsValid || !contract || !user) return;
 
     return [
       contract?.populate("setup_org",
         [
-          Number(formData.availableFunds), 
-          Number(formData.bonusAllocation), 
-          formData.token,
+          0, 
+          0, 
+          STARKGATE_STRK_ADDRESS,
           salt,
           user,
           formData.organizationName,
-          formData.ipfsUrl,
+          'ipfs_url',
           formData.adminFirstName,
           formData.adminLastName,
-          formData.adminAlias
+          formData.adminAlias,
+          0
         ])
     ]
   }, [
     formData.organizationName, 
     formData.adminAlias, formData.adminFirstName, 
-    formData.adminLastName, formData.availableFunds,
-    formData.bonusAllocation, formData.description,
-    formData.email, formData.ipfsUrl,
-    formData.owner, formData.token
+    formData.adminLastName, formData.description,
+    formData.email,
   ])
-
-  console.log(calls);
 
   const {
     sendAsync, data, isPending, isError, error
@@ -118,92 +97,23 @@ export function RegistrationForm() {
     }
 
     setIsSubmitting(true)
-    // try {
-    //   // In a real app, you would submit this data to your backend or smart contract
-    //   console.log("Form submitted:", formData)
-
-    //   const metadata: OrganizationMetadata = {
-    //     name: formData.organizationName,
-    //     description: formData.description,
-    //     email: formData.email,
-    //     adminName: `${formData.adminFirstName} ${formData.adminLastName}`,
-    //     createdAt: new Date().toISOString(),
-    //     version: "1.0"
-    //   };
-
-    //   console.log("Uploading data to Pinata...")
-    //   const ipfsUrl = await pinataService.uploadMetadata(metadata);
-    //   console.log("Metadata uploaded to ", ipfsUrl);
-    //   formData.ipfsUrl = ipfsUrl;   
-    // } catch {
-
-    // }
 
     console.log('Hit the ground running')
     try {
       console.log('Keep running and trying')
       const returns = await sendAsync();
       console.log(returns);
-      localStorage.setItem("organizationName", formData.organizationName)
+      localStorage.setItem("organizationName", formData.organizationName);
+      push('/dashboard');
 
       // // Redirect to dashboard
-      // router.push("/dashboard")
     } catch (error) {
       console.error("Error submitting form:", error)
       alert("There was an error submitting the form. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
-    // } catch (err) {
-    //   console.log('Catching...', err)
-    // } finally {
-    //   setIsSubmitting(false)
-    // }
   }
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   if (!isConnected) {
-  //     alert("Please connect your wallet to continue")
-  //     return
-  //   }
-
-  //   setIsSubmitting(true)
-  //   try {
-  //     // In a real app, you would submit this data to your backend or smart contract
-  //     console.log("Form submitted:", formData)
-
-  //     const metadata: OrganizationMetadata = {
-  //       name: formData.organizationName,
-  //       description: formData.description,
-  //       email: formData.email,
-  //       adminName: `${formData.adminFirstName} ${formData.adminLastName}`,
-  //       createdAt: new Date().toISOString(),
-  //       version: "1.0"
-  //     };
-
-  //     console.log("Uploading data to Pinata...")
-  //     const ipfsUrl = await pinataService.uploadMetadata(metadata);
-  //     console.log("Metadata uploaded to ", ipfsUrl);
-  //     formData.ipfsUrl = ipfsUrl;
-
-
-
-  //     // // Simulate API call
-  //     // await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  //     // // Store organization info in localStorage for demo purposes
-  //     // localStorage.setItem("organizationName", formData.organizationName)
-
-  //     // // Redirect to dashboard
-  //     // router.push("/dashboard")
-  //   } catch (error) {
-  //     console.error("Error submitting form:", error)
-  //     alert("There was an error submitting the form. Please try again.")
-  //   } finally {
-  //     setIsSubmitting(false)
-  //   }
-  // }
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-8">
@@ -264,22 +174,22 @@ export function RegistrationForm() {
                 <Input id="adminAlias" name="adminAlias" value={formData.adminAlias} onChange={handleChange} required />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="owner">Owner</Label>
                 <Input id="owner" name="owner" value={formData.owner} onChange={handleChange} required />
-              </div>
+              </div> */}
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="token">Token</Label>
                 <Input id="token" name="token" value={formData.token} onChange={handleChange} required />
-              </div>
+              </div> */}
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="ipfsUrl">IPFS URL</Label>
                 <Input id="ipfsUrl" name="ipfsUrl" value={formData.ipfsUrl} onChange={handleChange} required />
-              </div>
+              </div> */}
 
-              <div className="space-y-2">
+              { /*<div className="space-y-2">
                 <Label htmlFor="availableFunds">Available Funds</Label>
                 <Input id="availableFunds" name="availableFunds" value={formData.availableFunds} onChange={handleChange} required />
               </div>
@@ -287,7 +197,7 @@ export function RegistrationForm() {
               <div className="space-y-2">
                 <Label htmlFor="bonusAllocation">Bonus Allocation</Label>
                 <Input id="bonusAllocation" name="bonusAllocation" value={formData.bonusAllocation} onChange={handleChange} required />
-              </div>
+              </div> */}
 
     
               <Button

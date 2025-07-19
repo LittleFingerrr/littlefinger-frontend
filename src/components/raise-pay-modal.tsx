@@ -18,10 +18,11 @@ import { COREABI } from "@/lib/abi/core-abi"
 interface RaisePayModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  member: any
+  member: any,
+  id: any
 }
 
-export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps) {
+export function RaisePayModal({ open, onOpenChange, member, id }: RaisePayModalProps) {
   const [amount, setAmount] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -39,6 +40,18 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
         }
       : ({} as any),
   )
+
+  const { data: memberBasePay } = useReadContract(
+    user 
+    ? {
+      abi: COREABI,
+      address: contractAddressToHex(ContractAddresses?.[0]),
+      functionName: "get_member_base_pay",
+      args: [id],
+    } : ({} as any)
+  );
+  // console.log(memberBasePay)
+
 
   const { contract } = useContract(
     {
@@ -120,7 +133,7 @@ export function RaisePayModal({ open, onOpenChange, member }: RaisePayModalProps
           <div className="flex items-center gap-2 text-sm">
             <DollarSign className="h-4 w-4 text-blue-600" />
             <span className="text-blue-800">
-              Current Base Pay:{" "}
+              Current Base Pay: {Number(memberBasePay) || ""}
               {/* <span className="font-medium">{Number.parseFloat(currentBasePay.toString()).toFixed(4)} ETH</span> */}
             </span>
           </div>

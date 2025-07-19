@@ -9,10 +9,10 @@ import { CreateScheduleModal } from "@/components/create-schedule-modal"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useAccount, useContract, useReadContract } from "@starknet-react/core"
 import { FACTORYABI } from "@/lib/abi/factory-abi"
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { LITTLEFINGER_FACTORY_ADDRESS, SAMPLE_VAULT_ADDRESS } from "@/lib/constants"
 import { COREABI } from "@/lib/abi/core-abi"
 import { contractAddressToHex, timeStampToDate } from "@/lib/utils"
-import { CairoCustomEnum, CairoOption } from "starknet"
+import { BigNumberish, CairoCustomEnum, CairoOption } from "starknet"
 
 export default function SchedulesPage() {
   const [isCreateScheduleOpen, setIsCreateScheduleOpen] = useState(false)
@@ -51,6 +51,9 @@ export default function SchedulesPage() {
 
   console.log(disbursementSchedules)
 
+  const safeDisbursementSchedules = Array.isArray(disbursementSchedules) ? disbursementSchedules : [];
+  console.log(safeDisbursementSchedules)
+
   const {
     data: currentDisbursementSchedule, isLoading: isLoadingCurrentDisbursementSchedule
   } = useReadContract(
@@ -62,46 +65,7 @@ export default function SchedulesPage() {
     watch: true,
   } : ({} as any))
 
-  currentDisbursementSchedule && console.log(currentDisbursementSchedule)
-
-  const formattedDisbursementSchedule = () => {
-    if (!currentDisbursementSchedule) return
-
-    const endTimestamp = timeStampToDate(Number(currentDisbursementSchedule?.end_timestamp?.toString()));
-    const interval = Number(currentDisbursementSchedule?.interval) / 86400;
-    const now = Date.now();
-    // @ts-expect-error CairoOption problem
-    const lastExecution: CairoOption<number> = currentDisbursementSchedule?.last_execution;
-    const returnedLastExecution: number = lastExecution.Some || 0;
-    const scheduleId = Number(currentDisbursementSchedule?.schedule_id);
-    // @ts-expect-error CairoEnumProblem
-    const scheduleType: CairoCustomEnum = currentDisbursementSchedule?.schedule_type;
-    const returnedScheduleType = scheduleType?.activeVariant();
-    const startTimestamp = timeStampToDate(Number(currentDisbursementSchedule?.start_timestamp?.toString()));
-    let nextDate: Date | null = null;
-    if (returnedLastExecution > 0) {
-      nextDate = new Date(returnedLastExecution + (Number(currentDisbursementSchedule?.interval) * 1000));
-    } else {
-      nextDate = new Date(startTimestamp);
-    }
-
-    // Ensure next date doesn't exceed end timestamp
-    if (nextDate.getTime() > Number(endTimestamp)) {
-      nextDate = null;
-    }
-    // @ts-expect-error CairoEnum Problem
-    const status: CairoCustomEnum = currentDisbursementSchedule?.status;
-    const returnedStatus = status?.activeVariant();
-
-    return {
-      scheduleId, returnedScheduleType, startTimestamp, endTimestamp, interval, returnedLastExecution, returnedStatus, nextDate,
-      daysRemaining: nextDate ? 
-      Math.ceil((nextDate.getTime() - now) / (1000 * 60 * 60 * 24)) : 
-      0,
-    }
-  }
-
-  console.log(formattedDisbursementSchedule());
+  console.log(currentDisbursementSchedule)
 
   const activeSchedules = [
     { id: 1, name: "Monthly Payroll", type: "Fixed", interval: "30 days", nextRun: "May 31, 2024", status: "Active" },
@@ -123,11 +87,34 @@ export default function SchedulesPage() {
     },
   ]
 
+  const parsedSchedules = safeDisbursementSchedules.map((schedule) => {
+    const id = schedule?.schedule_id;
+    const interval = Number(schedule?.interval);
+    const start_timestamp = Number(schedule?.start_timestamp) * 1000;
+    const end_timestamp = Number(schedule?.end_timestamp) * 1000;
+    const status = (schedule?.status as CairoCustomEnum)?.activeVariant();
+    const schedule_type = (schedule?.schedule_type as CairoCustomEnum)?.activeVariant();
+    const last_execution = (schedule?.last_execution as CairoOption<BigNumberish>).unwrap() || 0;
+    console.log("last execution: ", last_execution);
+    console.log("schedule_type: ", schedule_type);
+    console.log("status: ", status);
+    return {
+      id,
+      name: `Schedule ${id}`,
+      type: schedule_type,
+      interval: `${Math.floor(interval / 86400)} Days`,
+      nextRun: Number(last_execution) + interval,
+      status,
+    }
+  })
+
+  console.log(parsedSchedules)
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Disbursement Schedules</h1>
 
-        { formattedDisbursementSchedule() ? (
+        {contractAddressToHex(SAMPLE_VAULT_ADDRESS) ? (
         <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader className="pb-2">
@@ -139,8 +126,8 @@ export default function SchedulesPage() {
                     <CalendarIcon className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">{(formattedDisbursementSchedule()?.nextDate)?.toDateString()}</div>
-                    <p className="text-sm text-muted-foreground">in {formattedDisbursementSchedule()?.daysRemaining} days</p>
+                    <div className="text-2xl font-bold">{new Date(Number(currentDisbursementSchedule?.start_timestamp) *1000 + Number(currentDisbursementSchedule?.interval)).toDateString()}</div>
+                    <p className="text-sm text-muted-foreground">in {Math.floor(Number(currentDisbursementSchedule?.interval) * 1000 / 86400)} days</p>
                   </div>
                 </div>
               </CardContent>
@@ -156,14 +143,14 @@ export default function SchedulesPage() {
                     <CheckCircle2 className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">{formattedDisbursementSchedule()?.returnedLastExecution == 0 ? 'Never' : formattedDisbursementSchedule()?.returnedLastExecution}</div>
+                    <div className="text-2xl font-bold">{Math.floor(Number(currentDisbursementSchedule?.last_execution)) || "Never"} days</div>
                     <p className="text-sm text-muted-foreground">{0} distributed</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
         </div>
-        ): (
+        ) : (
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader className="pb-2">
@@ -224,8 +211,8 @@ export default function SchedulesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {activeSchedules.map((schedule) => (
-                <TableRow key={schedule.id}>
+              {parsedSchedules.map((schedule, index) => (
+                <TableRow key={index}>
                   <TableCell className="font-medium">{schedule.name}</TableCell>
                   <TableCell>{schedule.type}</TableCell>
                   <TableCell>{schedule.interval}</TableCell>
@@ -233,7 +220,7 @@ export default function SchedulesPage() {
                   <TableCell>
                     <span
                       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        schedule.status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        (schedule.status as string).toLocaleLowerCase === ("Active").toLocaleLowerCase ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                       }`}
                     >
                       {schedule.status}

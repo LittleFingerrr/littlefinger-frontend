@@ -13,10 +13,11 @@ import { useAccount, useContract, useReadContract, useSendTransaction } from "@s
 import { FACTORYABI } from "@/lib/abi/factory-abi"
 import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants"
 import { VAULTABI } from "@/lib/abi/vault-abi"
-import { contractAddressToHex } from "@/lib/utils"
+import { contractAddressToHex, felt252ToString } from "@/lib/utils"
 import { COREABI } from "@/lib/abi/core-abi"
 import { CairoCustomEnum } from "starknet"
 import { ERC20ABI } from "@/lib/abi/token-abi"
+import { parse } from "path"
 
 export default function VaultPage() {
   const [isPayMemberOpen, setIsPayMemberOpen] = useState(false)
@@ -62,11 +63,45 @@ export default function VaultPage() {
         }
     : ({} as any)
   )
-  // @ts-expect-error CairoEnum Problem
-  const pseudoVaultStatus: CairoCustomEnum = contractVaultStatus;
-  const finalStatus = pseudoVaultStatus?.activeVariant();
-  console.log(finalStatus)
 
+  const { data: TransactionHistory, isLoading: transactionHistoryLoading } = useReadContract({
+    abi: VAULTABI,
+    address: contractAddressToHex(ContractAddresses?.[1]),
+    functionName: "get_transaction_history",
+    args: [],
+    watch: true
+  })
+
+  // console.log(TransactionHistory);
+  
+  const transactions = [
+    { id: 1, type: "Deposit", amount: "+$50,000.00", status: "Success", date: "May 15, 2024" },
+    { id: 2, type: "Withdrawal", amount: "-$10,000.00", status: "Success", date: "May 10, 2024" },
+    { id: 3, type: "Payout", amount: "-$18,700.00", status: "Success", date: "Apr 15, 2024" },
+  ]
+  
+  const parsedTxHistory = TransactionHistory?.map((tx, index) => {
+    const type = tx.transaction_type.activeVariant();
+    console.log(type);
+    const amount = Number(tx.amount) / 1e18;
+    console.log(amount);
+    const token = felt252ToString(tx.token);
+    const date = new Date(Number(tx.timestamp) * 1000).toDateString();
+
+    return {
+      id: index,
+      type,
+      amount,
+      token: 'STRK',
+      date
+    }
+  })
+
+  console.log(TransactionHistory);
+  console.log(parsedTxHistory);
+
+  const finalStatus = ((contractVaultStatus as any) as CairoCustomEnum)?.activeVariant();
+  
   const { contract } = useContract({
     abi: COREABI,
     address: contractAddressToHex(ContractAddresses?.[0]),
@@ -98,11 +133,6 @@ export default function VaultPage() {
   // Mock data for vault
   const vaultStatus = "Active & Operational"
 
-  const transactions = [
-    { id: 1, type: "Deposit", amount: "+$50,000.00", status: "Success", date: "May 15, 2024" },
-    { id: 2, type: "Withdrawal", amount: "-$10,000.00", status: "Success", date: "May 10, 2024" },
-    { id: 3, type: "Payout", amount: "-$18,700.00", status: "Success", date: "Apr 15, 2024" },
-  ]
 
   // Format the contract balance for display
   const formatBalance = (balance: any) => {
@@ -131,7 +161,7 @@ export default function VaultPage() {
                   {vaultBalanceIsLoading ? "Loading..." : `${formatBalance(contractVaultBalance)} STRK`}
                 </span>
                 {contractVaultBalance && (
-                  <span className="text-sm text-muted-foreground">Raw: {Number(contractVaultBalance).toString()}</span>
+                  <span className="text-sm text-muted-foreground">Raw: {formatBalance(contractVaultBalance).toString()}</span>
                 )}
               </div>
             </div>
@@ -147,7 +177,7 @@ export default function VaultPage() {
               <div className="mr-4 rounded-full bg-green-100 p-2">
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
               </div>
-              <span className="text-xl font-bold text-green-700">{vaultStatus}</span>
+              <span className="text-xl font-bold text-green-700">{finalStatus}</span>
             </div>
           </CardContent>
         </Card>
@@ -165,7 +195,7 @@ export default function VaultPage() {
           className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
           onClick={() => setIsFreezeOpen(true)}
         >
-          {finalStatus == "VAULTRESUMED" ? "Emergency Freeze" : "Unfreeze"}
+          {(finalStatus?.toString()) == "VAULTRESUMED" ? "Emergency Freeze" : "Unfreeze"}
         </Button>
         <Button variant="outline" onClick={handlePayment} disabled={isPaying}>
           Payout
@@ -186,21 +216,24 @@ export default function VaultPage() {
               <TableRow>
                 <TableHead>Transaction</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Token</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Details</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((transaction) => (
+              {parsedTxHistory?.map((transaction) => {
+                const isPositive = transaction.type.toLowerCase() === "deposit"
+                const isNeutral = transaction.type.toLowerCase() === "bonus_allocation";
+                return (
                 <TableRow key={transaction.id}>
                   <TableCell className="font-medium">{transaction.type}</TableCell>
-                  <TableCell className={transaction.amount.startsWith("+") ? "text-green-600" : "text-red-600"}>
+                  <TableCell className={isPositive ? "text-green-600" : isNeutral ? '': "text-red-600"}>
                     {transaction.amount}
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                      {transaction.status}
+                      {transaction.token}
                     </span>
                   </TableCell>
                   <TableCell>{transaction.date}</TableCell>
@@ -210,7 +243,7 @@ export default function VaultPage() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         </div>

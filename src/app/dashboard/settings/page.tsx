@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,8 +7,40 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
+import { useAccount, useReadContract } from "@starknet-react/core"
+import { FACTORYABI } from "@/lib/abi/factory-abi"
+import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants"
+import { COREABI } from "@/lib/abi/core-abi"
+import { contractAddressToHex } from "@/lib/utils"
 
 export default function SettingsPage() {
+
+  const { address: user } = useAccount();
+
+  const { data: ContractAddresses } = useReadContract(
+    user
+      ? {
+          abi: FACTORYABI,
+          address: LITTLEFINGER_FACTORY_ADDRESS,
+          functionName: "get_vault_org_pair",
+          args: [user!],
+          watch: true,
+        }
+      : ({} as any),
+  )
+
+  const { data: Org_Info, isLoading: OrgInfoLoading } = useReadContract({
+    abi: COREABI,
+    address: contractAddressToHex(ContractAddresses?.[0]),
+    functionName: "get_organization_details",
+    args: [],
+    watch: true
+  })
+  
+  console.log(Org_Info);
+  
+  const organizationName = Org_Info?.name;
+
   return (
     <div className="space-y-6">
       <div>
@@ -31,17 +65,17 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="org-name">Organization Name</Label>
-                <Input id="org-name" defaultValue="Acme Corp" />
+                <Input id="org-name" defaultValue={Org_Info?.name} />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="org-email">Email Address</Label>
-                <Input id="org-email" type="email" defaultValue="admin@acmecorp.com" />
+                <Input id="org-email" type="email" defaultValue={`admin@${Org_Info?.name.toLowerCase()}.com`} />
               </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="org-description">Organization Description</Label>
-                <Input id="org-description" defaultValue="Leading provider of digital solutions" />
+                <Input id="org-description" defaultValue={"Leading provider of digital solutions"} />
               </div>
 
               <Button>Save Changes</Button>
@@ -125,7 +159,7 @@ export default function SettingsPage() {
               <div className="grid gap-2">
                 <Label htmlFor="wallet-address">Connected Wallet</Label>
                 <div className="flex items-center">
-                  <Input id="wallet-address" readOnly value="0x06c0...c39df" className="bg-muted" />
+                  <Input id="wallet-address" readOnly value={user} className="bg-muted" />
                   <Button variant="outline" className="ml-2">
                     Disconnect
                   </Button>

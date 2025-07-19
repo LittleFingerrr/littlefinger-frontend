@@ -1,16 +1,16 @@
 export const COREABI = [
   {
-    "type": "impl",
     "name": "UpgradeableImpl",
+    "type": "impl",
     "interface_name": "openzeppelin_upgrades::interface::IUpgradeable"
   },
   {
-    "type": "interface",
     "name": "openzeppelin_upgrades::interface::IUpgradeable",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "upgrade",
+        "type": "function",
         "inputs": [
           {
             "name": "new_class_hash",
@@ -23,24 +23,24 @@ export const COREABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "CoreImpl",
+    "type": "impl",
     "interface_name": "littlefinger::interfaces::icore::ICore"
   },
   {
-    "type": "interface",
     "name": "littlefinger::interfaces::icore::ICore",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "schedule_payout",
+        "type": "function",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "initialize_disbursement_schedule",
+        "type": "function",
         "inputs": [
           {
             "name": "schedule_type",
@@ -65,13 +65,41 @@ export const COREABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "MemberImpl",
+    "type": "impl",
     "interface_name": "littlefinger::interfaces::imember_manager::IMemberManager"
   },
   {
+    "name": "core::integer::u256",
+    "type": "struct",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "name": "core::option::Option::<core::felt252>",
     "type": "enum",
+    "variants": [
+      {
+        "name": "Some",
+        "type": "core::felt252"
+      },
+      {
+        "name": "None",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "name": "littlefinger::structs::member_structs::MemberRole",
+    "type": "enum",
     "variants": [
       {
         "name": "None",
@@ -92,36 +120,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
-    "name": "core::integer::u256",
-    "members": [
-      {
-        "name": "low",
-        "type": "core::integer::u128"
-      },
-      {
-        "name": "high",
-        "type": "core::integer::u128"
-      }
-    ]
-  },
-  {
-    "type": "enum",
-    "name": "core::option::Option::<core::felt252>",
-    "variants": [
-      {
-        "name": "Some",
-        "type": "core::felt252"
-      },
-      {
-        "name": "None",
-        "type": "()"
-      }
-    ]
-  },
-  {
-    "type": "enum",
     "name": "littlefinger::structs::member_structs::MemberStatus",
+    "type": "enum",
     "variants": [
       {
         "name": "ACTIVE",
@@ -142,8 +142,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "enum",
     "name": "core::option::Option::<core::integer::u256>",
+    "type": "enum",
     "variants": [
       {
         "name": "Some",
@@ -156,8 +156,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "enum",
     "name": "core::option::Option::<core::integer::u64>",
+    "type": "enum",
     "variants": [
       {
         "name": "Some",
@@ -170,8 +170,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
     "name": "littlefinger::structs::member_structs::MemberResponse",
+    "type": "struct",
     "members": [
       {
         "name": "fname",
@@ -232,8 +232,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
     "name": "core::array::Span::<littlefinger::structs::member_structs::MemberResponse>",
+    "type": "struct",
     "members": [
       {
         "name": "snapshot",
@@ -242,8 +242,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
     "name": "littlefinger::structs::member_structs::MemberConfig",
+    "type": "struct",
     "members": [
       {
         "name": "weight",
@@ -256,12 +256,12 @@ export const COREABI = [
     ]
   },
   {
-    "type": "interface",
     "name": "littlefinger::interfaces::imember_manager::IMemberManager",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "add_member",
+        "type": "function",
         "inputs": [
           {
             "name": "fname",
@@ -277,7 +277,7 @@ export const COREABI = [
           },
           {
             "name": "role",
-            "type": "littlefinger::structs::member_structs::MemberRole"
+            "type": "core::integer::u16"
           },
           {
             "name": "address",
@@ -288,8 +288,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "add_admin",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -300,8 +300,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "invite_member",
+        "type": "function",
         "inputs": [
           {
             "name": "role",
@@ -324,8 +324,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "accept_invite",
+        "type": "function",
         "inputs": [
           {
             "name": "fname",
@@ -344,8 +344,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "update_member_details",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -368,8 +368,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "update_member_base_pay",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -384,8 +384,24 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
+        "name": "get_member_base_pay",
         "type": "function",
+        "inputs": [
+          {
+            "name": "member_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
         "name": "suspend_member",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -396,8 +412,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "reinstate_member",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -408,8 +424,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "get_members",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -419,8 +435,8 @@ export const COREABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "get_member",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -435,8 +451,8 @@ export const COREABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "update_member_config",
+        "type": "function",
         "inputs": [
           {
             "name": "config",
@@ -447,8 +463,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "record_member_payment",
+        "type": "function",
         "inputs": [
           {
             "name": "member_id",
@@ -469,13 +485,13 @@ export const COREABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "DisbursementImpl",
+    "type": "impl",
     "interface_name": "littlefinger::interfaces::idisbursement::IDisbursement"
   },
   {
-    "type": "enum",
     "name": "littlefinger::structs::disbursement_structs::ScheduleStatus",
+    "type": "enum",
     "variants": [
       {
         "name": "ACTIVE",
@@ -492,8 +508,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "enum",
     "name": "littlefinger::structs::disbursement_structs::ScheduleType",
+    "type": "enum",
     "variants": [
       {
         "name": "RECURRING",
@@ -506,8 +522,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
     "name": "littlefinger::structs::disbursement_structs::DisbursementSchedule",
+    "type": "struct",
     "members": [
       {
         "name": "schedule_id",
@@ -540,52 +556,12 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
-    "name": "littlefinger::structs::member_structs::Member",
-    "members": [
-      {
-        "name": "id",
-        "type": "core::integer::u256"
-      },
-      {
-        "name": "address",
-        "type": "core::starknet::contract_address::ContractAddress"
-      },
-      {
-        "name": "status",
-        "type": "littlefinger::structs::member_structs::MemberStatus"
-      },
-      {
-        "name": "role",
-        "type": "littlefinger::structs::member_structs::MemberRole"
-      },
-      {
-        "name": "base_pay",
-        "type": "core::integer::u256"
-      }
-    ]
-  },
-  {
-    "type": "enum",
-    "name": "core::bool",
-    "variants": [
-      {
-        "name": "False",
-        "type": "()"
-      },
-      {
-        "name": "True",
-        "type": "()"
-      }
-    ]
-  },
-  {
-    "type": "interface",
     "name": "littlefinger::interfaces::idisbursement::IDisbursement",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "create_disbursement_schedule",
+        "type": "function",
         "inputs": [
           {
             "name": "schedule_type",
@@ -608,44 +584,22 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
+        "name": "pause_disbursement",
         "type": "function",
-        "name": "pause_disbursement_schedule",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
+        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "resume_schedule",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
+        "type": "function",
+        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
-        "type": "function",
-        "name": "delete_schedule",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
         "name": "get_current_schedule",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -655,8 +609,8 @@ export const COREABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "get_disbursement_schedules",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -666,55 +620,8 @@ export const COREABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
-        "name": "retry_failed_disbursement",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "get_pending_failed_disbursements",
-        "inputs": [],
-        "outputs": [],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "add_failed_disbursement",
-        "inputs": [
-          {
-            "name": "member",
-            "type": "littlefinger::structs::member_structs::Member"
-          },
-          {
-            "name": "disbursement_id",
-            "type": "core::integer::u256"
-          },
-          {
-            "name": "timestamp",
-            "type": "core::integer::u64"
-          },
-          {
-            "name": "caller",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::bool"
-          }
-        ],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
         "name": "update_current_schedule_last_execution",
+        "type": "function",
         "inputs": [
           {
             "name": "timestamp",
@@ -725,8 +632,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "set_current_schedule",
+        "type": "function",
         "inputs": [
           {
             "name": "schedule_id",
@@ -737,12 +644,12 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "compute_renumeration",
+        "type": "function",
         "inputs": [
           {
             "name": "member",
-            "type": "littlefinger::structs::member_structs::Member"
+            "type": "littlefinger::structs::member_structs::MemberResponse"
           },
           {
             "name": "total_bonus_available",
@@ -761,8 +668,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "update_schedule_interval",
+        "type": "function",
         "inputs": [
           {
             "name": "schedule_id",
@@ -777,8 +684,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "update_schedule_type",
+        "type": "function",
         "inputs": [
           {
             "name": "schedule_id",
@@ -793,8 +700,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "get_last_disburse_time",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -804,8 +711,8 @@ export const COREABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "get_next_disburse_time",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -817,13 +724,13 @@ export const COREABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "OrganizationImpl",
+    "type": "impl",
     "interface_name": "littlefinger::interfaces::iorganization::IOrganization"
   },
   {
-    "type": "struct",
     "name": "core::byte_array::ByteArray",
+    "type": "struct",
     "members": [
       {
         "name": "data",
@@ -840,8 +747,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "enum",
     "name": "core::option::Option::<core::byte_array::ByteArray>",
+    "type": "enum",
     "variants": [
       {
         "name": "Some",
@@ -854,8 +761,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
     "name": "littlefinger::structs::organization::OrganizationConfig",
+    "type": "struct",
     "members": [
       {
         "name": "name",
@@ -868,8 +775,22 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
+    "name": "littlefinger::structs::organization::OrganizationType",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "CENTRALIZED",
+        "type": "()"
+      },
+      {
+        "name": "DECENTRALIZED",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "name": "littlefinger::structs::organization::OrganizationInfo",
+    "type": "struct",
     "members": [
       {
         "name": "org_id",
@@ -898,16 +819,20 @@ export const COREABI = [
       {
         "name": "created_at",
         "type": "core::integer::u64"
+      },
+      {
+        "name": "organization_type",
+        "type": "littlefinger::structs::organization::OrganizationType"
       }
     ]
   },
   {
-    "type": "interface",
     "name": "littlefinger::interfaces::iorganization::IOrganization",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "transfer_organization_claim",
+        "type": "function",
         "inputs": [
           {
             "name": "to",
@@ -918,8 +843,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "adjust_committee",
+        "type": "function",
         "inputs": [
           {
             "name": "add",
@@ -934,8 +859,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "update_organization_config",
+        "type": "function",
         "inputs": [
           {
             "name": "config",
@@ -946,8 +871,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "get_organization_details",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -959,61 +884,245 @@ export const COREABI = [
     ]
   },
   {
-    "type": "impl",
     "name": "VotingImpl",
-    "interface_name": "littlefinger::interfaces::voting::IVote"
+    "type": "impl",
+    "interface_name": "littlefinger::interfaces::dao_controller::IVote"
   },
   {
+    "name": "littlefinger::structs::member_structs::InviteStatus",
     "type": "enum",
-    "name": "littlefinger::structs::voting::PollStatus",
     "variants": [
       {
-        "name": "Pending",
+        "name": "PENDING",
         "type": "()"
       },
       {
-        "name": "Started",
+        "name": "ACCEPTED",
         "type": "()"
       },
       {
-        "name": "Finished",
+        "name": "REJECTED",
+        "type": "()"
+      },
+      {
+        "name": "EXPIRED",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::member_structs::MemberInvite",
+    "type": "struct",
+    "members": [
+      {
+        "name": "address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "role",
+        "type": "littlefinger::structs::member_structs::MemberRole"
+      },
+      {
+        "name": "base_pay",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "invite_status",
+        "type": "littlefinger::structs::member_structs::InviteStatus"
+      },
+      {
+        "name": "expiry",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::ADDMEMBER",
+    "type": "struct",
+    "members": [
+      {
+        "name": "member",
+        "type": "littlefinger::structs::member_structs::MemberInvite"
+      },
+      {
+        "name": "member_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::UPDATEMEMBERBASEPAY",
+    "type": "struct",
+    "members": [
+      {
+        "name": "member_id",
+        "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::CHANGEMEMBERSTATUS",
+    "type": "struct",
+    "members": [
+      {
+        "name": "member_id",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "current_status",
+        "type": "littlefinger::structs::member_structs::MemberStatus"
+      },
+      {
+        "name": "proposed_status",
+        "type": "littlefinger::structs::member_structs::MemberStatus"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::SETCURRENTDISBURSEMENTSCHEDULE",
+    "type": "struct",
+    "members": [
+      {
+        "name": "schedule_id",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "previous_schedule",
+        "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+      },
+      {
+        "name": "new_schedule",
+        "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::CHANGESCHEDULESTATUS",
+    "type": "struct",
+    "members": [
+      {
+        "name": "schedule_id",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "previous_status",
+        "type": "littlefinger::structs::disbursement_structs::ScheduleStatus"
+      },
+      {
+        "name": "new_status",
+        "type": "littlefinger::structs::disbursement_structs::ScheduleStatus"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::CHANGEORGANIZATIONTYPE",
+    "type": "struct",
+    "members": [
+      {
+        "name": "current_config",
+        "type": "littlefinger::structs::organization::OrganizationType"
+      },
+      {
+        "name": "new_config",
+        "type": "littlefinger::structs::organization::OrganizationType"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::PollReason",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "ADDMEMBER",
+        "type": "littlefinger::structs::dao_controller::ADDMEMBER"
+      },
+      {
+        "name": "UPDATEMEMBERBASEPAY",
+        "type": "littlefinger::structs::dao_controller::UPDATEMEMBERBASEPAY"
+      },
+      {
+        "name": "CHANGEMEMBERSTATUS",
+        "type": "littlefinger::structs::dao_controller::CHANGEMEMBERSTATUS"
+      },
+      {
+        "name": "SETCURRENTDISBURSEMENTSCHEDULE",
+        "type": "littlefinger::structs::dao_controller::SETCURRENTDISBURSEMENTSCHEDULE"
+      },
+      {
+        "name": "CHANGESCHEDULESTATUS",
+        "type": "littlefinger::structs::dao_controller::CHANGESCHEDULESTATUS"
+      },
+      {
+        "name": "CHANGEORGANIZATIONTYPE",
+        "type": "littlefinger::structs::dao_controller::CHANGEORGANIZATIONTYPE"
+      }
+    ]
+  },
+  {
+    "name": "core::bool",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "littlefinger::structs::dao_controller::PollStatus",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "ACTIVE",
+        "type": "()"
+      },
+      {
+        "name": "FINISHED",
         "type": "core::bool"
       }
     ]
   },
   {
+    "name": "littlefinger::structs::dao_controller::Poll",
     "type": "struct",
-    "name": "littlefinger::structs::voting::Poll",
     "members": [
       {
-        "name": "owner",
-        "type": "core::starknet::contract_address::ContractAddress"
-      },
-      {
-        "name": "name",
-        "type": "core::byte_array::ByteArray"
-      },
-      {
-        "name": "desc",
-        "type": "core::byte_array::ByteArray"
-      },
-      {
-        "name": "yes_votes",
+        "name": "proposer",
         "type": "core::integer::u256"
       },
       {
-        "name": "no_votes",
+        "name": "poll_id",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "reason",
+        "type": "littlefinger::structs::dao_controller::PollReason"
+      },
+      {
+        "name": "up_votes",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "down_votes",
         "type": "core::integer::u256"
       },
       {
         "name": "status",
-        "type": "littlefinger::structs::voting::PollStatus"
+        "type": "littlefinger::structs::dao_controller::PollStatus"
+      },
+      {
+        "name": "created_at",
+        "type": "core::integer::u64"
       }
     ]
   },
   {
+    "name": "littlefinger::structs::dao_controller::VotingConfig",
     "type": "struct",
-    "name": "littlefinger::structs::voting::VotingConfig",
     "members": [
       {
         "name": "private",
@@ -1034,43 +1143,55 @@ export const COREABI = [
     ]
   },
   {
+    "name": "littlefinger::interfaces::dao_controller::IVote",
     "type": "interface",
-    "name": "littlefinger::interfaces::voting::IVote",
     "items": [
       {
-        "type": "function",
         "name": "create_poll",
+        "type": "function",
         "inputs": [
           {
-            "name": "name",
-            "type": "core::byte_array::ByteArray"
+            "name": "member_id",
+            "type": "core::integer::u256"
           },
           {
-            "name": "desc",
-            "type": "core::byte_array::ByteArray"
+            "name": "reason",
+            "type": "littlefinger::structs::dao_controller::PollReason"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "name": "approve",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "poll_id",
+            "type": "core::integer::u256"
           },
           {
             "name": "member_id",
             "type": "core::integer::u256"
           }
         ],
-        "outputs": [
-          {
-            "type": "core::integer::u256"
-          }
-        ],
+        "outputs": [],
         "state_mutability": "external"
       },
       {
+        "name": "reject",
         "type": "function",
-        "name": "vote",
         "inputs": [
           {
-            "name": "support",
-            "type": "core::bool"
+            "name": "poll_id",
+            "type": "core::integer::u256"
           },
           {
-            "name": "id",
+            "name": "member_id",
             "type": "core::integer::u256"
           }
         ],
@@ -1078,59 +1199,118 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
+        "name": "set_threshold",
         "type": "function",
-        "name": "get_poll",
         "inputs": [
           {
-            "name": "id",
+            "name": "new_threshold",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "member_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "get_poll",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "poll_id",
             "type": "core::integer::u256"
           }
         ],
         "outputs": [
           {
-            "type": "littlefinger::structs::voting::Poll"
+            "type": "littlefinger::structs::dao_controller::Poll"
           }
         ],
         "state_mutability": "view"
       },
       {
+        "name": "get_all_polls",
         "type": "function",
-        "name": "end_poll",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<littlefinger::structs::dao_controller::Poll>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "update_voting_config",
+        "type": "function",
         "inputs": [
           {
-            "name": "id",
-            "type": "core::integer::u256"
+            "name": "config",
+            "type": "littlefinger::structs::dao_controller::VotingConfig"
           }
         ],
         "outputs": [],
         "state_mutability": "external"
       },
       {
+        "name": "get_threshold",
         "type": "function",
-        "name": "update_voting_config",
-        "inputs": [
+        "inputs": [],
+        "outputs": [
           {
-            "name": "config",
-            "type": "littlefinger::structs::voting::VotingConfig"
+            "type": "core::integer::u256"
           }
         ],
-        "outputs": [],
-        "state_mutability": "external"
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_eligible_voters",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_eligible_pollers",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_eligible_executors",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
       }
     ]
   },
   {
-    "type": "impl",
     "name": "OwnableMixinImpl",
+    "type": "impl",
     "interface_name": "openzeppelin_access::ownable::interface::OwnableABI"
   },
   {
-    "type": "interface",
     "name": "openzeppelin_access::ownable::interface::OwnableABI",
+    "type": "interface",
     "items": [
       {
-        "type": "function",
         "name": "owner",
+        "type": "function",
         "inputs": [],
         "outputs": [
           {
@@ -1140,8 +1320,8 @@ export const COREABI = [
         "state_mutability": "view"
       },
       {
-        "type": "function",
         "name": "transfer_ownership",
+        "type": "function",
         "inputs": [
           {
             "name": "new_owner",
@@ -1152,15 +1332,15 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "renounce_ownership",
+        "type": "function",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "transferOwnership",
+        "type": "function",
         "inputs": [
           {
             "name": "newOwner",
@@ -1171,8 +1351,8 @@ export const COREABI = [
         "state_mutability": "external"
       },
       {
-        "type": "function",
         "name": "renounceOwnership",
+        "type": "function",
         "inputs": [],
         "outputs": [],
         "state_mutability": "external"
@@ -1180,8 +1360,8 @@ export const COREABI = [
     ]
   },
   {
-    "type": "constructor",
     "name": "constructor",
+    "type": "constructor",
     "inputs": [
       {
         "name": "org_id",
@@ -1218,257 +1398,374 @@ export const COREABI = [
       {
         "name": "deployer",
         "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "organization_type",
+        "type": "core::integer::u8"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "littlefinger::structs::member_structs::MemberInvited",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "data",
         "name": "address",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "data",
         "name": "role",
-        "type": "littlefinger::structs::member_structs::MemberRole",
-        "kind": "data"
+        "type": "littlefinger::structs::member_structs::MemberRole"
       },
       {
+        "kind": "data",
         "name": "timestamp",
-        "type": "core::integer::u64",
-        "kind": "data"
+        "type": "core::integer::u64"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "littlefinger::structs::member_structs::MemberEvent",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "data",
         "name": "fname",
-        "type": "core::felt252",
-        "kind": "data"
+        "type": "core::felt252"
       },
       {
+        "kind": "data",
         "name": "lname",
-        "type": "core::felt252",
-        "kind": "data"
+        "type": "core::felt252"
       },
       {
+        "kind": "data",
         "name": "address",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "data"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "data",
         "name": "status",
-        "type": "littlefinger::structs::member_structs::MemberStatus",
-        "kind": "data"
+        "type": "littlefinger::structs::member_structs::MemberStatus"
       },
       {
+        "kind": "data",
         "name": "value",
-        "type": "core::felt252",
-        "kind": "data"
+        "type": "core::felt252"
       },
       {
+        "kind": "data",
         "name": "timestamp",
-        "type": "core::integer::u64",
-        "kind": "data"
+        "type": "core::integer::u64"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "enum",
     "name": "littlefinger::structs::member_structs::MemberEnum",
-    "kind": "enum",
+    "type": "event",
     "variants": [
       {
+        "kind": "nested",
         "name": "Invited",
-        "type": "littlefinger::structs::member_structs::MemberInvited",
-        "kind": "nested"
+        "type": "littlefinger::structs::member_structs::MemberInvited"
       },
       {
+        "kind": "nested",
         "name": "Added",
-        "type": "littlefinger::structs::member_structs::MemberEvent",
-        "kind": "nested"
+        "type": "littlefinger::structs::member_structs::MemberEvent"
       },
       {
+        "kind": "nested",
         "name": "Removed",
-        "type": "littlefinger::structs::member_structs::MemberEvent",
-        "kind": "nested"
+        "type": "littlefinger::structs::member_structs::MemberEvent"
       },
       {
+        "kind": "nested",
         "name": "Suspended",
-        "type": "littlefinger::structs::member_structs::MemberEvent",
-        "kind": "nested"
+        "type": "littlefinger::structs::member_structs::MemberEvent"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "enum",
     "name": "littlefinger::components::member_manager::MemberManagerComponent::Event",
-    "kind": "enum",
+    "type": "event",
     "variants": [
       {
+        "kind": "flat",
         "name": "MemberEnum",
-        "type": "littlefinger::structs::member_structs::MemberEnum",
-        "kind": "flat"
+        "type": "littlefinger::structs::member_structs::MemberEnum"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "key",
         "name": "previous_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "key",
         "name": "new_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "key",
         "name": "previous_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       },
       {
+        "kind": "key",
         "name": "new_owner",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "enum",
     "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-    "kind": "enum",
+    "type": "event",
     "variants": [
       {
+        "kind": "nested",
         "name": "OwnershipTransferred",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
-        "kind": "nested"
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred"
       },
       {
+        "kind": "nested",
         "name": "OwnershipTransferStarted",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
-        "kind": "nested"
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted"
       }
     ]
   },
   {
-    "type": "event",
+    "kind": "struct",
     "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-    "kind": "struct",
+    "type": "event",
     "members": [
       {
+        "kind": "data",
         "name": "class_hash",
-        "type": "core::starknet::class_hash::ClassHash",
-        "kind": "data"
+        "type": "core::starknet::class_hash::ClassHash"
       }
     ]
   },
   {
-    "type": "event",
-    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
     "kind": "enum",
+    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+    "type": "event",
     "variants": [
       {
+        "kind": "nested",
         "name": "Upgraded",
-        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
-        "kind": "nested"
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded"
       }
     ]
   },
   {
-    "type": "event",
-    "name": "littlefinger::components::organization::OrganizationComponent::Event",
     "kind": "enum",
+    "name": "littlefinger::components::organization::OrganizationComponent::Event",
+    "type": "event",
     "variants": []
   },
   {
-    "type": "event",
-    "name": "littlefinger::structs::voting::Voted",
     "kind": "struct",
+    "name": "littlefinger::structs::dao_controller::Voted",
+    "type": "event",
     "members": [
       {
+        "kind": "key",
         "name": "id",
-        "type": "core::integer::u256",
-        "kind": "key"
+        "type": "core::integer::u256"
       },
       {
+        "kind": "key",
         "name": "voter",
-        "type": "core::starknet::contract_address::ContractAddress",
-        "kind": "key"
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "kind": "data",
+        "name": "timestamp",
+        "type": "core::integer::u64"
       }
     ]
   },
   {
+    "kind": "struct",
+    "name": "littlefinger::structs::dao_controller::PollResolved",
     "type": "event",
-    "name": "littlefinger::components::voting::VotingComponent::Event",
+    "members": [
+      {
+        "kind": "key",
+        "name": "id",
+        "type": "core::integer::u256"
+      },
+      {
+        "kind": "data",
+        "name": "outcome",
+        "type": "core::bool"
+      },
+      {
+        "kind": "data",
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "littlefinger::structs::dao_controller::PollCreated",
+    "type": "event",
+    "members": [
+      {
+        "kind": "key",
+        "name": "id",
+        "type": "core::integer::u256"
+      },
+      {
+        "kind": "key",
+        "name": "proposer",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "kind": "data",
+        "name": "reason",
+        "type": "littlefinger::structs::dao_controller::PollReason"
+      },
+      {
+        "kind": "data",
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "littlefinger::structs::dao_controller::PollStopped",
+    "type": "event",
+    "members": [
+      {
+        "kind": "key",
+        "name": "id",
+        "type": "core::integer::u256"
+      },
+      {
+        "kind": "key",
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "littlefinger::structs::dao_controller::ThresholdChanged",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "previous_threshold",
+        "type": "core::integer::u256"
+      },
+      {
+        "kind": "data",
+        "name": "new_threshold",
+        "type": "core::integer::u256"
+      },
+      {
+        "kind": "data",
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
     "kind": "enum",
+    "name": "littlefinger::components::dao_controller::VotingComponent::Event",
+    "type": "event",
     "variants": [
       {
+        "kind": "nested",
         "name": "Voted",
-        "type": "littlefinger::structs::voting::Voted",
-        "kind": "nested"
+        "type": "littlefinger::structs::dao_controller::Voted"
+      },
+      {
+        "kind": "nested",
+        "name": "PollResolved",
+        "type": "littlefinger::structs::dao_controller::PollResolved"
+      },
+      {
+        "kind": "nested",
+        "name": "PollCreated",
+        "type": "littlefinger::structs::dao_controller::PollCreated"
+      },
+      {
+        "kind": "nested",
+        "name": "PollStopped",
+        "type": "littlefinger::structs::dao_controller::PollStopped"
+      },
+      {
+        "kind": "nested",
+        "name": "ThresholdChanged",
+        "type": "littlefinger::structs::dao_controller::ThresholdChanged"
       }
     ]
   },
   {
-    "type": "event",
-    "name": "littlefinger::components::disbursement::DisbursementComponent::Event",
     "kind": "enum",
+    "name": "littlefinger::components::disbursement::DisbursementComponent::Event",
+    "type": "event",
     "variants": []
   },
   {
-    "type": "event",
-    "name": "littlefinger::contracts::core::Core::Event",
     "kind": "enum",
+    "name": "littlefinger::contracts::core::Core::Event",
+    "type": "event",
     "variants": [
       {
+        "kind": "flat",
         "name": "MemberEvent",
-        "type": "littlefinger::components::member_manager::MemberManagerComponent::Event",
-        "kind": "flat"
+        "type": "littlefinger::components::member_manager::MemberManagerComponent::Event"
       },
       {
+        "kind": "flat",
         "name": "OwnableEvent",
-        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
-        "kind": "flat"
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event"
       },
       {
+        "kind": "flat",
         "name": "UpgradeableEvent",
-        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
-        "kind": "flat"
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event"
       },
       {
+        "kind": "flat",
         "name": "OrganizationEvent",
-        "type": "littlefinger::components::organization::OrganizationComponent::Event",
-        "kind": "flat"
+        "type": "littlefinger::components::organization::OrganizationComponent::Event"
       },
       {
+        "kind": "flat",
         "name": "VotingEvent",
-        "type": "littlefinger::components::voting::VotingComponent::Event",
-        "kind": "flat"
+        "type": "littlefinger::components::dao_controller::VotingComponent::Event"
       },
       {
+        "kind": "flat",
         "name": "DisbursementEvent",
-        "type": "littlefinger::components::disbursement::DisbursementComponent::Event",
-        "kind": "flat"
+        "type": "littlefinger::components::disbursement::DisbursementComponent::Event"
       }
     ]
   }

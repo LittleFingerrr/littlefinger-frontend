@@ -93,63 +93,10 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
     try {
         console.log(erc20Calls, VaultCalls);
         await sendAsync();
+        handleClose();
     } catch (err) {
         console.error(err)
     }
-    // if (!amount || Number.parseFloat(amount) <= 0) {
-    //   toast({
-    //     title: "Invalid Amount",
-    //     description: "Please enter a valid amount greater than 0",
-    //     variant: "destructive",
-    //   })
-    //   return
-    // }
-
-    // if (!contract) {
-    //   toast({
-    //     title: "Contract Not Found",
-    //     description: "Unable to connect to vault contract",
-    //     variant: "destructive",
-    //   })
-    //   return
-    // }
-
-    // setIsSubmitting(true)
-    // try {
-    //   // Convert amount to the appropriate format for the contract
-    //   // Assuming the contract expects the amount in wei or similar format
-    //   const amountInWei = (Number.parseFloat(amount) * 1e18).toString()
-
-    //   // Call the deposit function on the contract
-    //   const call = {
-    //     contractAddress: contract.address,
-    //     entrypoint: "deposit",
-    //     calldata: [amountInWei],
-    //   }
-
-    //   // Execute the transaction
-    //   // Note: You'll need to implement the actual transaction execution
-    //   // This is a placeholder for the actual contract call
-    //   console.log("Depositing:", { amount, amountInWei, call })
-
-    //   toast({
-    //     title: "Deposit Initiated",
-    //     description: `Depositing ${amount} tokens to vault`,
-    //   })
-
-    //   // Reset form and close modal
-    //   setAmount("")
-    //   onOpenChange(false)
-    // } catch (error) {
-    //   console.error("Error depositing funds:", error)
-    //   toast({
-    //     title: "Deposit Failed",
-    //     description: "There was an error processing your deposit. Please try again.",
-    //     variant: "destructive",
-    //   })
-    // } finally {
-    //   setIsSubmitting(false)
-    // }
   }
 
   const handleClose = () => {
@@ -180,7 +127,7 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
                 required
                 disabled={isSubmitting}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">ETH</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">STRK</span>
             </div>
             <p className="text-xs text-muted-foreground">Enter the amount you want to deposit to the vault</p>
           </div>
@@ -189,16 +136,16 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
             <div className="rounded-lg bg-blue-50 p-3">
               <div className="flex justify-between text-sm">
                 <span>Deposit Amount:</span>
-                <span className="font-medium">{amount} ETH</span>
+                <span className="font-medium">{amount} STRK</span>
               </div>
-              <div className="flex justify-between text-sm text-muted-foreground">
+              {/* <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Gas Fee:</span>
-                <span>~0.001 ETH</span>
-              </div>
+                <span>~0.001 STRK</span>
+              </div> */}
               <hr className="my-2" />
               <div className="flex justify-between text-sm font-medium">
                 <span>Total:</span>
-                <span>~{(Number.parseFloat(amount) + 0.001).toFixed(3)} ETH</span>
+                <span>~{(Number.parseFloat(amount) + 0.001).toFixed(3)} STRK</span>
               </div>
             </div>
           )}
