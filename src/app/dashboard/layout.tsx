@@ -25,7 +25,7 @@ export default function DashboardLayout({
           ${!isCollapsed ? "lg:ml-64" : "lg:ml-20"}
         `}
       >
-        <div className="absolute w-[20%] h-48 -top-10 -right-10 bg-primary-glow rounded-[5.53125rem] blur-[3.125rem]" />
+        <div className="absolute w-[10%] h-48 -top-12 -right-12 bg-primary-glow rounded-[5.53125rem] blur-[3.125rem]" />
         <Header
           onMenuClick={() => setMobileMenuOpen(true)}
           onToggleCollapse={() => setCollapsed(!isCollapsed)}

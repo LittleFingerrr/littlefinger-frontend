@@ -15,7 +15,7 @@ export const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
          ${isCollapsed && "hidden"}
         `}
       >
-        Little Finger
+        LittleFinger
       </h2>
     </div>
   </div>

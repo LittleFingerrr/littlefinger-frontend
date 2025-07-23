@@ -52,7 +52,7 @@ export function Header({
         <span className="sr-only">Toggle Sidebar</span>
       </Button>
 
-      <h1 className="flex-1 font-lato text-[1.5rem] md:text-[2rem] font-semibold text-white">
+      <h1 className="flex-1 font-lato text-[1rem] md:text-[2rem] font-semibold text-white">
         {Title}
       </h1>
       <ConnectWallet />
