@@ -1,6 +1,6 @@
 import React from 'react';
 import { MetricCard as MetricCardType } from '@/lib/mockData';
-import { Wallet, Clock, Users } from 'lucide-react';
+import { Wallet, Clock, User } from 'lucide-react';
 
 interface MetricCardProps {
   metric: MetricCardType;
@@ -13,7 +13,7 @@ const getIcon = (iconName: string) => {
     case 'clock':
       return <Clock className="w-8 h-8 text-white" />;
     case 'users':
-      return <Users className="w-8 h-8 text-white" />;
+      return <User className="w-8 h-8 text-white" />;
     default:
       return <Wallet className="w-8 h-8 text-white" />;
   }
