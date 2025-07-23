@@ -15,6 +15,9 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-[#070602] text-white flex">
       <main className="flex-1 relative">
+        <p className="mb-4 text-gray-300">
+          Manage your organization details and preferences
+        </p>
         <SettingsTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         {activeTab === "General" && (
           <>
