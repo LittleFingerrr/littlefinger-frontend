@@ -20,39 +20,43 @@ export default function DisbursementsTable({ disbursements }: DisbursementsTable
         </div>
         
         {/* Fixed Header */}
-        <div className="px-6 py-3">
-          <div className="grid grid-cols-5 gap-4 text-xs font-medium text-white uppercase tracking-wider">
-            <div>Date</div>
-            <div>Amount</div>
-            <div>Recipients</div>
-            <div>Status</div>
-            <div>Actions</div>
+        <div className="px-6 py-3 overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-5 gap-4 text-xs font-medium text-white uppercase tracking-wider">
+              <div>Date</div>
+              <div>Amount</div>
+              <div>Recipients</div>
+              <div>Status</div>
+              <div>Actions</div>
+            </div>
           </div>
         </div>
         
         {/* Scrollable Data */}
-        <div className="overflow-y-auto table-scroll" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-          <div className="px-6">
-            {disbursements.map((disbursement, index) => (
-              <div key={index} className="grid grid-cols-5 gap-4 py-4">
-                <div className="text-sm text-white">{disbursement.date}</div>
-                <div className="text-sm text-white">{disbursement.amount}</div>
-                <div className="text-sm text-white">{disbursement.recipients}</div>
-                <div>
-                  <span 
-                    className="inline-flex px-3 py-1 text-xs font-medium rounded-full text-white"
-                    style={{ backgroundColor: '#6B4F3B' }}
-                  >
-                    {disbursement.status}
-                  </span>
+        <div className="overflow-y-auto table-scroll" style={{ maxHeight: 'calc(100vh - 405px)' }}>
+          <div className="px-6 overflow-x-auto">
+            <div className="min-w-[800px]">
+              {disbursements.map((disbursement, index) => (
+                <div key={index} className="grid grid-cols-5 gap-4 py-4">
+                  <div className="text-sm text-white">{disbursement.date}</div>
+                  <div className="text-sm text-white">{disbursement.amount}</div>
+                  <div className="text-sm text-white">{disbursement.recipients}</div>
+                  <div>
+                    <span 
+                      className="inline-flex px-3 py-1 text-xs font-medium rounded-full text-white"
+                      style={{ backgroundColor: '#6B4F3B' }}
+                    >
+                      {disbursement.status}
+                    </span>
+                  </div>
+                  <div>
+                    <button className="text-sm text-white hover:text-gray-300 transition-colors">
+                      View Details
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <button className="text-sm text-white hover:text-gray-300 transition-colors">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
