@@ -1,4 +1,4 @@
-// components/DisbursementCard.tsx
+
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -27,7 +27,6 @@ const DisbursementCard: React.FC<DisbursementCardProps> = ({
         height: "188px"
       }}
     >
-      {/* Glow effect - present on both cards */}
       <div
         className="absolute bottom-[-65px] right-14 w-32 h-32 rounded-3xl"
         style={{
