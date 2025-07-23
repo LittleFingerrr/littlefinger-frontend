@@ -13,16 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  useAccount,
-  useContract,
-  useReadContract,
-  useSendTransaction,
-} from "@starknet-react/core";
-import { FACTORYABI } from "@/lib/abi/factory-abi";
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants";
-import { VAULTABI } from "@/lib/abi/vault-abi";
-import { contractAddressToHex } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle } from "lucide-react";
 
@@ -32,65 +22,16 @@ interface WithdrawModalProps {
 }
 
 export function WithdrawModal({ open, onOpenChange }: WithdrawModalProps) {
+  const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { address: user } = useAccount();
-  const { toast } = useToast();
-
-  const { data: ContractAddresses } = useReadContract(
-    user
-      ? {
-          abi: FACTORYABI,
-          address: LITTLEFINGER_FACTORY_ADDRESS,
-          functionName: "get_vault_org_pair",
-          args: [user!],
-          watch: true,
-        }
-      : ({} as any)
-  );
-
-  const { data: contractVaultBalance } = useReadContract(
-    user
-      ? {
-          abi: VAULTABI,
-          address: contractAddressToHex(ContractAddresses?.[1]),
-          functionName: "get_balance",
-          args: [],
-          watch: true,
-        }
-      : ({} as any)
-  );
-
-  const { contract } = useContract({
-    abi: VAULTABI,
-    address: contractAddressToHex(ContractAddresses?.[1]),
-  });
-
-  const calls = useMemo(() => {
-    const isValid = amount !== "" && !Number.isNaN(amount);
-
-    if (!isValid || !contract || !user) return;
-
-    return [contract.populate("withdraw_funds", [Number(amount), user])];
-  }, [amount, user, contract]);
-
-  const { sendAsync } = useSendTransaction({ calls });
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Only allow numbers and decimal point
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
-    }
-  };
 
   const formatBalance = (balance: any) => {
     if (!balance) return 0;
     return Number(balance) / 1e18;
   };
 
-  const availableBalance = Number(contractVaultBalance);
+  const availableBalance = 0;
   const withdrawAmount = Number.parseFloat(amount) || 0;
   const isInsufficientFunds = withdrawAmount > availableBalance;
 
@@ -125,7 +66,7 @@ export function WithdrawModal({ open, onOpenChange }: WithdrawModalProps) {
       // Execute the transaction
       console.log("Withdrawing:", { amount, amountInWei });
 
-      await sendAsync();
+      // await sendAsync();
       toast({
         title: "Withdrawal Initiated",
         description: `Withdrawing ${amount} ETH from vault`,
@@ -172,7 +113,7 @@ export function WithdrawModal({ open, onOpenChange }: WithdrawModalProps) {
                 name="amount"
                 type="text"
                 value={amount}
-                onChange={handleAmountChange}
+                onChange={() => {}}
                 placeholder="0.00"
                 className="pr-20"
                 required

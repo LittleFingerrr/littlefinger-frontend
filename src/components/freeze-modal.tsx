@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,16 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  useAccount,
-  useContract,
-  useReadContract,
-  useSendTransaction,
-} from "@starknet-react/core";
-import { FACTORYABI } from "@/lib/abi/factory-abi";
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants";
-import { VAULTABI } from "@/lib/abi/vault-abi";
-import { contractAddressToHex } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { AlertTriangle, Shield } from "lucide-react";
 
@@ -35,33 +25,7 @@ export function FreezeModal({ open, onOpenChange }: FreezeModalProps) {
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { address: user } = useAccount();
   const { toast } = useToast();
-
-  const { data: ContractAddresses } = useReadContract(
-    user
-      ? {
-          abi: FACTORYABI,
-          address: LITTLEFINGER_FACTORY_ADDRESS,
-          functionName: "get_vault_org_pair",
-          args: [user!],
-          watch: true,
-        }
-      : ({} as any)
-  );
-
-  const { contract } = useContract({
-    abi: VAULTABI,
-    address: contractAddressToHex(ContractAddresses?.[1]),
-  });
-
-  const calls = useMemo(() => {
-    if (!contract) return;
-
-    return [contract.populate("emergency_freeze", [])];
-  }, [user, contract]);
-
-  const { sendAsync } = useSendTransaction({ calls });
 
   const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setReason(e.target.value);
@@ -79,22 +43,13 @@ export function FreezeModal({ open, onOpenChange }: FreezeModalProps) {
       return;
     }
 
-    if (!contract) {
-      toast({
-        title: "Contract Not Found",
-        description: "Unable to connect to vault contract",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       // Call the emergency freeze function on the contract
 
       // Execute the transaction
       console.log("Emergency freezing vault:", { reason });
-      await sendAsync();
+      //  await sendAsync();
 
       toast({
         title: "Emergency Freeze Initiated",

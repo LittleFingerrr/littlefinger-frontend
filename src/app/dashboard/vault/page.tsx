@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,78 +14,15 @@ import {
 import { DepositModal } from "../../../components/deposit-modal";
 import { WithdrawModal } from "../../../components/withdraw-modal";
 import { FreezeModal } from "../../../components/freeze-modal";
-import {
-  useAccount,
-  useContract,
-  useReadContract,
-  useSendTransaction,
-} from "@starknet-react/core";
-import { FACTORYABI } from "@/lib/abi/factory-abi";
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants";
-import { VAULTABI } from "@/lib/abi/vault-abi";
-import { contractAddressToHex } from "@/lib/utils";
-import { COREABI } from "@/lib/abi/core-abi";
 import Image from "next/image";
 import icon1 from "../../../../public/icon1.svg";
 import icon2 from "../../../../public/icon2.svg";
 
 export default function VaultPage() {
-  const [isPayMemberOpen, setIsPayMemberOpen] = useState(false);
   const [isDepositOpen, setIsDepositOpen] = useState(false);
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [isFreezeOpen, setIsFreezeOpen] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
-
-  const { address: user } = useAccount();
-
-  const { data: ContractAddresses } = useReadContract(
-    user
-      ? {
-          abi: FACTORYABI,
-          address: LITTLEFINGER_FACTORY_ADDRESS,
-          functionName: "get_vault_org_pair",
-          args: [user!],
-          watch: true,
-        }
-      : ({} as any)
-  );
-
-  const { data: contractVaultBalance, isLoading: vaultBalanceIsLoading } =
-    useReadContract(
-      user
-        ? {
-            abi: VAULTABI,
-            address: contractAddressToHex(ContractAddresses?.[1]),
-            functionName: "get_balance",
-            args: [],
-            watch: true,
-          }
-        : ({} as any)
-    );
-
-  const { contract } = useContract({
-    abi: COREABI,
-    address: contractAddressToHex(ContractAddresses?.[0]),
-  });
-
-  const paymentCall = useMemo(() => {
-    if (!contract || !user) return;
-    return [contract.populate("schedule_payout", [])];
-  }, [contract, user]);
-
-  const { sendAsync: sendPayment } = useSendTransaction({ calls: paymentCall });
-
-  const handlePayment = async () => {
-    setIsPaying(true);
-    try {
-      console.log("Sending Payment");
-      await sendPayment();
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setIsPaying(false);
-    }
-  };
 
   // Mock data for vault
   const vaultStatus = "Active and Operational";
@@ -151,9 +88,7 @@ export default function VaultPage() {
 
                 <div className="flex flex-col">
                   <span className="text-2xl font-bold text-white tracking-tight">
-                    {vaultBalanceIsLoading
-                      ? "Loading..."
-                      : `${formatBalance(contractVaultBalance)} STRK`}
+                    {`0.00 STRK`}
                   </span>
                 </div>
               </div>
@@ -209,8 +144,8 @@ export default function VaultPage() {
           </Button>
           <Button
             className="bg-[#FFFFFF21] hover:bg-gray-600 text-white font-medium px-10 py-6 rounded-full"
-            onClick={handlePayment}
-            disabled={isPaying}
+            onClick={() => {}}
+            disabled={false}
           >
             Payout
           </Button>

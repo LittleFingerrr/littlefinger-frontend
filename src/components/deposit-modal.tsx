@@ -13,17 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  useAccount,
-  useContract,
-  useReadContract,
-  useSendTransaction,
-} from "@starknet-react/core";
-import { FACTORYABI } from "@/lib/abi/factory-abi";
-import { LITTLEFINGER_FACTORY_ADDRESS } from "@/lib/constants";
-import { VAULTABI } from "@/lib/abi/vault-abi";
-import { contractAddressToHex } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
 
 interface DepositModalProps {
   open: boolean;
@@ -33,35 +22,6 @@ interface DepositModalProps {
 export function DepositModal({ open, onOpenChange }: DepositModalProps) {
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { address: user } = useAccount();
-
-  const { data: ContractAddresses } = useReadContract(
-    user
-      ? {
-          abi: FACTORYABI,
-          address: LITTLEFINGER_FACTORY_ADDRESS,
-          functionName: "get_vault_org_pair",
-          args: [user],
-          watch: true,
-        }
-      : ({} as any)
-  );
-
-  const { contract } = useContract({
-    abi: VAULTABI,
-    address: contractAddressToHex(ContractAddresses?.[1]),
-  });
-
-  const calls = useMemo(() => {
-    const isValid = amount !== "" && !Number.isNaN(amount);
-
-    if (!isValid || !contract || !user) return;
-
-    return [contract?.populate("deposit_funds", [Number(amount), user])];
-  }, [amount, user, contract]);
-
-  const { sendAsync, isPending } = useSendTransaction({ calls });
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -75,8 +35,8 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
     e.preventDefault();
 
     try {
-      console.log(calls);
-      await sendAsync();
+      // console.log(calls);
+      // await sendAsync();
     } catch (err) {
       console.error(err);
     }
@@ -205,9 +165,7 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
             <Button
               type="submit"
               className="bg-blue-600 hover:bg-blue-700"
-              disabled={
-                !amount || Number.parseFloat(amount) <= 0 || isSubmitting
-              }
+              disabled={false}
             >
               {isSubmitting ? "Processing..." : "Deposit Funds"}
             </Button>
