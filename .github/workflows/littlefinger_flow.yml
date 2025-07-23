@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - master
-      - hackquest
   pull_request:
     branches:
       - master
-      - hackquest
 
 jobs:
   build:
