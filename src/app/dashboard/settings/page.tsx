@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import SettingsHeader from "@/components/settings/SettingsHeader";
 import SettingsTabs from "@/components/settings/SettingsTabs";
 import OrganizationForm from "@/components/settings/OrganizationForm";
 import DisplaySettings from "@/components/settings/DisplaySettings";
