@@ -1,9 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lato } from "next/font/google";
+import { Montserrat_Subrayada as MontserratSubrayada } from "next/font/google";
 import "./globals.css";
 import { StarknetProvider } from "@/components/StarknetProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const fontMontserratSubrayada = MontserratSubrayada({
+  subsets: ["latin"],
+  weight: "700",
+  variable: "--font-montserrat-subrayada",
+});
+
+const fontLato = Lato({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-lato",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,10 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <StarknetProvider>
-          {children}
-        </StarknetProvider>
+      <body
+        className={`${inter.variable} ${fontMontserratSubrayada.variable} ${fontLato.variable} `}
+      >
+        <StarknetProvider>{children}</StarknetProvider>
       </body>
     </html>
   );
