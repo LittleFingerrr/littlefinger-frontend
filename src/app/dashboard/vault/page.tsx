@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CheckCircle2, DollarSign } from "lucide-react";
 import { DepositModal } from "../../../components/deposit-modal";
 import { WithdrawModal } from "../../../components/withdraw-modal";
 import { FreezeModal } from "../../../components/freeze-modal";
@@ -124,14 +123,6 @@ export default function VaultPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-800">
-        <h1 className="text-3xl font-bold">Vault</h1>
-        <Button className="bg-[#967623] rounded-full text-white hover:bg-[#967523e5] font-medium py-5 px-6">
-          Connect wallet
-        </Button>
-      </div>
-
       <div className="p-6 space-y-8">
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="bg-[#131313A6] border-none p-4 relative overflow-hidden">
@@ -150,7 +141,7 @@ export default function VaultPage() {
 
             <CardContent className="relative z-10 pt-6 ml-12 pb-10">
               <div className="flex items-center space-x-4">
-                <div className=" border border-white px-2 py-3 rounded-lg backdrop-blur-sm">
+                <div className=" border-2 border-white px-2 py-3 rounded-lg backdrop-blur-sm">
                   <Image
                     src={icon1}
                     alt="icon1"
