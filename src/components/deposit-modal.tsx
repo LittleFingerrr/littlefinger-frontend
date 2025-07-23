@@ -33,67 +33,6 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
-      // console.log(calls);
-      // await sendAsync();
-    } catch (err) {
-      console.error(err);
-    }
-    // if (!amount || Number.parseFloat(amount) <= 0) {
-    //   toast({
-    //     title: "Invalid Amount",
-    //     description: "Please enter a valid amount greater than 0",
-    //     variant: "destructive",
-    //   })
-    //   return
-    // }
-
-    // if (!contract) {
-    //   toast({
-    //     title: "Contract Not Found",
-    //     description: "Unable to connect to vault contract",
-    //     variant: "destructive",
-    //   })
-    //   return
-    // }
-
-    // setIsSubmitting(true)
-    // try {
-    //   // Convert amount to the appropriate format for the contract
-    //   // Assuming the contract expects the amount in wei or similar format
-    //   const amountInWei = (Number.parseFloat(amount) * 1e18).toString()
-
-    //   // Call the deposit function on the contract
-    //   const call = {
-    //     contractAddress: contract.address,
-    //     entrypoint: "deposit",
-    //     calldata: [amountInWei],
-    //   }
-
-    //   // Execute the transaction
-    //   // Note: You'll need to implement the actual transaction execution
-    //   // This is a placeholder for the actual contract call
-    //   console.log("Depositing:", { amount, amountInWei, call })
-
-    //   toast({
-    //     title: "Deposit Initiated",
-    //     description: `Depositing ${amount} tokens to vault`,
-    //   })
-
-    //   // Reset form and close modal
-    //   setAmount("")
-    //   onOpenChange(false)
-    // } catch (error) {
-    //   console.error("Error depositing funds:", error)
-    //   toast({
-    //     title: "Deposit Failed",
-    //     description: "There was an error processing your deposit. Please try again.",
-    //     variant: "destructive",
-    //   })
-    // } finally {
-    //   setIsSubmitting(false)
-    // }
   };
 
   const handleClose = () => {
