@@ -33,10 +33,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${fontMontserratSubrayada.variable} ${fontLato.variable} `}
-      >
-        <StarknetProvider>{children}</StarknetProvider>
+      <body className={`${inter.variable} ${fontMontserratSubrayada.variable} ${fontLato.variable} bg-regal-black text-white`}>
+        <StarknetProvider>
+          {children}
+        </StarknetProvider>
       </body>
     </html>
   );

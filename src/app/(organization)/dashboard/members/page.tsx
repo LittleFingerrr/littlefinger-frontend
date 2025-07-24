@@ -1,8 +1,11 @@
-export default function MembersPage() {
+import MembersContent from "@/components/dashboard/members/MembersContent"
+
+const MembersPage = () => {
   return (
-    <div>
-      <h1 className="text-3xl font-bold">Members</h1>
-      <p className="text-muted-foreground">Manage your members here.</p>
+    <div className="mt-4 md:mt-8 space-y-8">
+        <MembersContent />
     </div>
-  );
+  )
 }
+
+export default MembersPage
