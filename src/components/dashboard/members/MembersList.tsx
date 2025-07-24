@@ -50,8 +50,8 @@ const MembersList = () => {
   return (
     <div className='space-y-6'>
         <div className="flex w-full items-center gap-2">
-            <Input className="h-10" placeholder="Search Members..." />
-            <Button className="rounded-lg bg-white/15 font-normal text-base" size={'lg'} variant="outline">
+            <Input className="h-10 rounded-[0.5rem]" placeholder="Search Members..." />
+            <Button className="rounded-[0.5rem] bg-white/15 font-normal text-base" size={'lg'} variant="outline">
                 Filter by Role
             </Button>
         </div>
