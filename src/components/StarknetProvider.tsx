@@ -11,7 +11,7 @@ import {
   StarknetConfig,
   starkscan,
   useInjectedConnectors,
-  jsonRpcProvider
+  jsonRpcProvider,
 } from "@starknet-react/core";
 import { ArgentMobileConnector } from "starknetkit/argentMobile";
 import { WebWalletConnector } from "starknetkit/webwallet";
@@ -23,7 +23,8 @@ interface StarknetProviderProps {
 export function StarknetProvider({ children }: StarknetProviderProps) {
   const { connectors: injected } = useInjectedConnectors({
     recommended: [argent(), braavos()],
-    includeRecommended: "always",
+    includeRecommended: "onlyIfNoConnectors",
+    order: "random",
   });
 
   const connectors = [
@@ -50,14 +51,14 @@ export function StarknetProvider({ children }: StarknetProviderProps) {
 
   return (
     <StarknetConfig
-    // @ts-expect-error connectors error
+      // @ts-expect-error connectors error
       connectors={connectors}
       chains={[mainnet, sepolia]}
-      provider={
-        jsonRpcProvider({ rpc: (chain) => ({
-          nodeUrl: process.env.NEXT_PUBLIC_RPC_URL
-        })})
-      }
+      provider={jsonRpcProvider({
+        rpc: (chain) => ({
+          nodeUrl: process.env.NEXT_PUBLIC_RPC_URL,
+        }),
+      })}
       explorer={starkscan}
       autoConnect
     >
