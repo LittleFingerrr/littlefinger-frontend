@@ -11,12 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DepositModal } from "../../../../components/deposit-modal";
-import { WithdrawModal } from "../../../../components/withdraw-modal";
-import { FreezeModal } from "../../../../components/freeze-modal";
+import { DepositModal } from "@/components/deposit-modal";
+import { WithdrawModal } from "@/components/withdraw-modal";
+import { FreezeModal } from "@/components/freeze-modal";
 import Image from "next/image";
-import icon1 from "../../../../public/icon1.svg";
-import icon2 from "../../../../public/icon2.svg";
+import icon1 from "/public/icon1.svg";
+import icon2 from "/public/icon2.svg";
 
 export default function VaultPage() {
   const [isDepositOpen, setIsDepositOpen] = useState(false);
