@@ -18,7 +18,7 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
 }) => {
   return (
     <div className="flex items-center justify-center min-h-[400px] p-6">
-      <Card className="max-w-md w-full bg-gray-900 border-gray-700">
+      <Card className="max-w-md w-full bg-[#131313A6] border-[#967623] rounded-3xl">
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-4">
             {!isWalletConnected ? (
@@ -43,7 +43,7 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
             {!isWalletConnected && onConnectWallet ? (
               <Button
                 onClick={onConnectWallet}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-full bg-[#967623] text-white"
               >
                 <Wallet className="w-4 h-4 mr-2" />
                 Connect Wallet
@@ -51,7 +51,7 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
             ) : onRetry ? (
               <Button
                 onClick={onRetry}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="w-[50%] bg-[#967623] text-white rounded-3xl"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try Again
