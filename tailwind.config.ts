@@ -13,6 +13,7 @@ const config: Config = {
         sans: ["var(--font-sans)"],
         "montserrat-subrayada": ["var(--font-montserrat-subrayada)"],
         lato: ["var(--font-lato)"],
+        Unbounded: ["var(--font-unbounded)"],
       },
 
       colors: {

@@ -35,7 +35,7 @@ export function Header({
       <Button
         variant="outline"
         size="icon"
-        className="lg:hidden"
+        className="lg:hidden w-[25px] h-[23.87px]"
         onClick={onMenuClick}
       >
         <Menu className="h-6 w-6" />
@@ -52,7 +52,7 @@ export function Header({
         <span className="sr-only">Toggle Sidebar</span>
       </Button>
 
-      <h1 className="flex-1 font-lato text-[1rem] md:text-[2rem] font-semibold text-white">
+      <h1 className="flex-1 font-lato text-[1.25rem] md:text-[2rem] font-bold md:font-semibold text-white">
         {Title}
       </h1>
       <ConnectWallet />

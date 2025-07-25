@@ -60,9 +60,9 @@ export default function VaultPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="p-6 space-y-8">
+      <div className="md:p-6 space-y-8">
         <div className="grid gap-6 md:grid-cols-2">
-          <Card className="bg-[#131313A6] border-none p-4 relative overflow-hidden">
+          <Card className="bg-[#131313A6] border-none md:p-4 h-[146px] relative overflow-hidden">
             <div
               className="absolute bottom-0 right-16 -mb-8 w-60 h-32 
                bg-gradient-to-t from-[#F3A42C4D] to-transparent 
@@ -71,18 +71,18 @@ export default function VaultPage() {
             />
 
             <CardHeader className=" relative z-10">
-              <CardTitle className="text-xl font-bold text-white">
+              <CardTitle className="md:text-xl font-semibold md:font-bold text-white text-base font-Unbounded">
                 Total Balance
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="relative z-10 pt-6 ml-12 pb-10">
-              <div className="flex items-center space-x-4">
-                <div className=" border-2 border-white px-2 py-3 rounded-lg backdrop-blur-sm">
+            <CardContent className="relative z-10 md:pt-6 md:ml-12 md:pb-10 pb-0">
+              <div className="flex items-center space-x-4 ml-4">
+                <div className=" border-2 border-white px-2 py-3 rounded-sm md:rounded-lg backdrop-blur-sm">
                   <Image
                     src={icon1}
                     alt="icon1"
-                    className="h-7 w-7 text-white"
+                    className="h-[15px] w-[20px] md:h-7 md:w-7 text-white"
                   />
                 </div>
 
@@ -95,7 +95,7 @@ export default function VaultPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-[#131313A6] border-none p-4 relative overflow-hidden">
+          <Card className="bg-[#131313A6] border-none md:p-4 h-[146px] relative overflow-hidden">
             <div
               className="absolute bottom-0 right-16 -mb-8 w-60 h-32 
                bg-gradient-to-t from-[#F3A42C4D] to-transparent 
@@ -104,17 +104,17 @@ export default function VaultPage() {
             />
 
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-medium text-white">
+              <CardTitle className="text-lg font-medium text-white font-Unbounded">
                 Vault Status
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="relative z-10 pt-6 ml-12 pb-10">
-              <div className="flex items-center space-x-4">
-                <div className="">
-                  <Image src={icon2} alt="icon2" className=" text-white" />
+            <CardContent className="relative z-10 md:pt-6 md:ml-12 md:pb-10 pb-0">
+              <div className="flex items-center space-x-4 ml-4">
+                <div className="h-[48px] w-[48px]">
+                  <Image src={icon2} alt="icon2" className=" text-white h-[40px] w-[40px]" />
                 </div>
-                <span className="text-2xl font-bold text-white tracking-tight">
+                <span className="text-2xl font-extrabold md:font-bold text-white tracking-tight">
                   {vaultStatus}
                 </span>
               </div>
@@ -123,9 +123,9 @@ export default function VaultPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4">
+        <div className="flex md:flex-wrap gap-4">
           <Button
-            className="bg-[#9C7924] hover:bg-yellow-700 text-black font-medium px-10 py-6 rounded-full"
+            className="bg-[#9C7924] hover:bg-yellow-700 text-white font-medium px-10 py-6 rounded-full"
             onClick={() => setIsDepositOpen(true)}
           >
             Deposit Funds
@@ -183,22 +183,22 @@ export default function VaultPage() {
               style={{ filter: "blur(32px)" }}
             />
 
-            <Table>
+            <Table className="border-separate justify-start font-Unbounded">
               <TableHeader>
                 <TableRow className="border-gray-800 hover:bg-gray-800/50">
-                  <TableHead className="text-gray-300 font-bold text-base">
+                  <TableHead className="text-gray-300 font-normal text-sm md:text-base font-Unbounded">
                     Transaction
                   </TableHead>
-                  <TableHead className="text-gray-300 font-bold text-base">
+                  <TableHead className="text-gray-300 font-normal text-sm md:text-base font-Unbounded pl-14">
                     Amount
                   </TableHead>
-                  <TableHead className="text-gray-300 font-bold text-base">
+                  <TableHead className="text-gray-300 font-normal text-sm md:text-base font-Unbounded pl-14">
                     Status
                   </TableHead>
-                  <TableHead className="text-gray-300 font-bold text-base">
+                  <TableHead className="text-gray-300 font-normal text-sm md:text-base font-Unbounded pl-14">
                     Date
                   </TableHead>
-                  <TableHead className="text-gray-300 font-bold text-base">
+                  <TableHead className="text-gray-300 font-normal text-sm md:text-base font-Unbounded pl-14">
                     Details
                   </TableHead>
                 </TableRow>
@@ -208,29 +208,29 @@ export default function VaultPage() {
                 {transactions.map((transaction) => (
                   <TableRow
                     key={transaction.id}
-                    className="border-gray-800 p-4 hover:bg-gray-800/30"
+                    className="border-gray-800 p-4 hover:bg-gray-800/30 text-[13px]"
                   >
-                    <TableCell className="font-bold py-5 text-base text-white">
+                    <TableCell className="font-bold py-5  md:text-base text-white">
                       {transaction.type}
                     </TableCell>
                     <TableCell
                       className={
-                        transaction.amount.startsWith("+")
+                        (transaction.amount.startsWith("+")
                           ? "text-green-400 font-bold text-base"
-                          : "text-red-400 font-bold text-base"
+                          : "text-red-400 font-bold text-base") + " pl-14"
                       }
                     >
                       {transaction.amount}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="pl-14">
                       <span className="text-white font-bold text-base">
                         {transaction.status}
                       </span>
                     </TableCell>
-                    <TableCell className="text-gray-300">
+                    <TableCell className="text-gray-300 pl-14">
                       {transaction.date}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="pl-14">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -246,9 +246,9 @@ export default function VaultPage() {
           </div>
 
           {/* Pagination */}
-          <div className="flex space-y-4 items-center justify-between">
-            <p className="text-sm text-white">Showing 1-5 of 0 members</p>
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col space-y-4 md:items-center md:justify-between">
+            <p className="text-xs md:text-sm text-white justify-start">Showing 1-5 of 0 members</p>
+            <div className="flex items-center md:space-x-2 space-x-4 justify-end">
               <Button
                 size="sm"
                 className="h-10 w-8 p-0 bg-[#FFFFFF21] hover:bg-gray-600 text-white"
