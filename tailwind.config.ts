@@ -35,9 +35,9 @@ const config: Config = {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: "#F2A42C",
-        secondary: "#070602",
-        tertiary: "#3B3B45",
-        "primary-glow": "#F3A42C4D",
+			secondary: "#070602",
+			tertiary: "#3B3B45",
+        	"primary-glow": "#F3A42C4D",
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
@@ -72,6 +72,7 @@ const config: Config = {
   			},
 			'regal-black': '#070602',
 			'regal-gold': '#967623',
+			'regal-brown': '#5D3001',
   		}
   	}
   },
