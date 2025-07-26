@@ -1,10 +1,69 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAccount } from "@starknet-react/core";
 import { Sidebar } from "@/components/sidebar/index";
 import { Header } from "@/components/header";
-import { ContractPairProvider } from "./ContractPairContext"; 
-import DashboardContentWrapper from "./DashboardContentWrapper";
+import { ContractPairProvider, useContractPair } from "./ContractPairContext";
+import { OrganizationNotFound } from "@/components/OrganizationNotFound";
+import { RefreshCw } from 'lucide-react';
+
+// Main content component that uses the context
+const DashboardContent = ({ children }: { children: React.ReactNode }) => {
+  const { isLoading, hasOrganization, error, refetch } = useContractPair();
+  const { isConnected } = useAccount();
+  const router = useRouter();
+
+
+  const handleConnectWallet = () => {
+    console.log('Connect wallet clicked - handled by existing component');
+  };
+
+  const handleRetry = () => {
+    console.log('Retry clicked');
+    refetch();
+  };
+
+  const handleGoHome = () => {
+    router.replace('/');
+  };
+
+  if (!isConnected) {
+    return (
+      <OrganizationNotFound
+        message="Please connect your wallet to access the dashboard"
+        isWalletConnected={false}
+        onConnectWallet={handleConnectWallet}
+        onGoHome={handleGoHome}
+      />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-400">Loading organization contracts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasOrganization) {
+    return <>{children}</>;
+  }
+
+  return (
+    <OrganizationNotFound
+      message={error || "No organization found for this address"}
+      isWalletConnected={true}
+      onRetry={handleRetry}
+      onGoHome={handleGoHome}
+    />
+  );
+};
 
 export default function DashboardLayout({
   children,
@@ -13,15 +72,9 @@ export default function DashboardLayout({
 }) {
   const [isCollapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const [userAddress, setUserAddress] = useState<string>("0x123"); 
-  const [isWalletConnected, setIsWalletConnected] = useState<boolean>(true); 
 
   return (
-    <ContractPairProvider 
-      userAddress={userAddress} 
-      isWalletConnected={isWalletConnected}
-    >
+    <ContractPairProvider>
       <div className="flex min-h-screen w-full bg-secondary">
         <Sidebar
           isCollapsed={isCollapsed}
@@ -41,16 +94,9 @@ export default function DashboardLayout({
             isCollapsed={isCollapsed}
           />
           <main className="flex-grow p-6 overflow-y-auto scrollbar-hide">
-            <DashboardContentWrapper
-              userAddress={userAddress}
-              isWalletConnected={isWalletConnected}
-              onConnectWallet={() => {
-                // Handle wallet connection logic here
-                setIsWalletConnected(true);
-              }}
-            >
+            <DashboardContent>
               {children}
-            </DashboardContentWrapper>
+            </DashboardContent>
           </main>
         </div>
       </div>

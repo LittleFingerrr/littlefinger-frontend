@@ -1,11 +1,12 @@
 import React from 'react';
-import { AlertCircle, RefreshCw, Wallet } from 'lucide-react';
+import { AlertCircle, RefreshCw, Wallet, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface OrganizationNotFoundProps {
   onRetry?: () => void;
   onConnectWallet?: () => void;
+  onGoHome?: () => void;
   message?: string;
   isWalletConnected?: boolean;
 }
@@ -13,6 +14,7 @@ interface OrganizationNotFoundProps {
 export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
   onRetry,
   onConnectWallet,
+  onGoHome,
   message = "No organization found",
   isWalletConnected = false
 }) => {
@@ -22,9 +24,9 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-4">
             {!isWalletConnected ? (
-              <Wallet className="w-16 h-16 text-blue-500" />
+              <Wallet className="w-16 h-16  text-[#967623]" />
             ) : (
-              <AlertCircle className="w-16 h-16 text-yellow-500" />
+              <AlertCircle className="w-16 h-16 text-[#967623]" />
             )}
           </div>
           
@@ -40,10 +42,11 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
           </p>
           
           <div className="space-y-3">
+            {/* Primary action button */}
             {!isWalletConnected && onConnectWallet ? (
               <Button
                 onClick={onConnectWallet}
-                className="w-full bg-[#967623] text-white"
+                className="w-full bg-[#967623] hover:bg-[#967623]/80 text-white rounded-3xl"
               >
                 <Wallet className="w-4 h-4 mr-2" />
                 Connect Wallet
@@ -51,12 +54,23 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
             ) : onRetry ? (
               <Button
                 onClick={onRetry}
-                className="w-[50%] bg-[#967623] text-white rounded-3xl"
+                className="w-full bg-[#967623] hover:bg-[#967623]/80 text-white rounded-3xl"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try Again
               </Button>
             ) : null}
+
+            {onGoHome && (
+              <Button
+                onClick={onGoHome}
+                variant="outline"
+                className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white rounded-3xl"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Go Home
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

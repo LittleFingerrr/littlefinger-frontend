@@ -1,13 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useContract, useProvider } from '@starknet-react/core';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
+import { useContract, useProvider, useAccount } from '@starknet-react/core';
+import { useRouter } from 'next/navigation';
 import { LITTLEFINGER_FACTORY_ADDRESS } from '@/lib/constants';
 import { FACTORYABI } from '@/lib/abi/factory-abi';
 
 interface ContractPair {
-  vaultAddress: string;
-  orgCoreAddress: string;
+  vaultAddress: `0x${string}`;
+  orgCoreAddress: `0x${string}`;
 }
 
 interface ContractPairContextType {
@@ -15,39 +16,65 @@ interface ContractPairContextType {
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
+  hasOrganization: boolean;
 }
 
 const ContractPairContext = createContext<ContractPairContextType | undefined>(undefined);
 
 interface ContractPairProviderProps {
   children: ReactNode;
-  userAddress?: string;
-  isWalletConnected: boolean;
 }
 
 export const ContractPairProvider: React.FC<ContractPairProviderProps> = ({
-  children,
-  userAddress,
-  isWalletConnected
+  children
 }) => {
   const [contractPair, setContractPair] = useState<ContractPair>({
-    vaultAddress: "",
-    orgCoreAddress: ""
+    vaultAddress: "0x0" as `0x${string}`,
+    orgCoreAddress: "0x0" as `0x${string}`
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const router = useRouter();
+  
+  const { address: userAddress, isConnected: isWalletConnected } = useAccount();
+  
+  
   const { provider } = useProvider();
   const { contract: factoryContract } = useContract({
     abi: FACTORYABI,
     address: LITTLEFINGER_FACTORY_ADDRESS,
   });
 
-  const fetchContracts = async () => {
-    if (!isWalletConnected || !userAddress || !factoryContract) {
-      setContractPair({ vaultAddress: "", orgCoreAddress: "" });
+  const hasOrganization = useMemo(() => {
+    return contractPair.vaultAddress !== "0x0" && 
+           contractPair.orgCoreAddress !== "0x0" && 
+           contractPair.vaultAddress !== "0x" && 
+           contractPair.orgCoreAddress !== "0x";
+  }, [contractPair.vaultAddress, contractPair.orgCoreAddress]);
+
+  const fetchContracts = useCallback(async () => {
+    console.log('fetchContracts called:', { 
+      isWalletConnected, 
+      userAddress: !!userAddress, 
+      factoryContract: !!factoryContract,
+      userAddressValue: userAddress 
+    });
+    
+    if (!isWalletConnected || !userAddress) {
+      console.log('Wallet not connected or no address, resetting state');
+      setContractPair({ 
+        vaultAddress: "0x0" as `0x${string}`, 
+        orgCoreAddress: "0x0" as `0x${string}` 
+      });
       setIsLoading(false);
       setError(null);
+      return;
+    }
+
+    if (!factoryContract) {
+      console.log('Factory contract not ready');
+      setIsLoading(true);
       return;
     }
 
@@ -62,48 +89,82 @@ export const ContractPairProvider: React.FC<ContractPairProviderProps> = ({
       
       console.log('Factory contract result:', result);
 
-      const vaultAddress = result[0].toString();
-      const orgCoreAddress = result[1].toString();
+      const vaultAddress = result[0].toString() as `0x${string}`;
+      const orgCoreAddress = result[1].toString() as `0x${string}`;
 
       console.log('Parsed addresses:', { vaultAddress, orgCoreAddress });
 
-      if (vaultAddress === "0x0" || orgCoreAddress === "0x0" || vaultAddress === "0" || orgCoreAddress === "0") {
-        throw new Error("No organization found for this address");
+      if (vaultAddress === "0x0" || orgCoreAddress === "0x0" || vaultAddress === "0x" || orgCoreAddress === "0x") {
+        console.log('No organization found, redirecting to home');
+        setContractPair({ 
+          vaultAddress: "0x0" as `0x${string}`, 
+          orgCoreAddress: "0x0" as `0x${string}` 
+        });
+        setError("No organization found for this address");
+        setIsLoading(false);
+        
+        setTimeout(() => {
+          router.replace('/');
+        }, 1000);
+        return;
       }
 
+      console.log('Organization found, setting contract pair');
       setContractPair({
         vaultAddress,
         orgCoreAddress
       });
+      setError(null);
     } catch (err) {
       console.error("Error fetching contract pair:", err);
       
+      let errorMessage = "No organization found for this address";
+      let shouldRedirect = false;
+      
       if (err instanceof Error) {
         if (err.message.includes('Contract not found') || err.message.includes('Entry point not found')) {
-          setError("Factory contract not accessible");
+          errorMessage = "Factory contract not accessible";
+          shouldRedirect = false;
+        } else if (err.message.includes('No organization found') || err.message.includes('0x0')) {
+          errorMessage = "No organization found for this address";
+          shouldRedirect = true;
         } else {
-          setError(`No organization found: ${err.message}`);
+          errorMessage = err.message;
+          shouldRedirect = errorMessage.toLowerCase().includes('not found') || 
+                          errorMessage.toLowerCase().includes('no organization');
         }
-      } else {
-        setError("No organization found for this address");
       }
       
-      setContractPair({ vaultAddress: "", orgCoreAddress: "" });
+      setError(errorMessage);
+      setContractPair({ 
+        vaultAddress: "0x0" as `0x${string}`, 
+        orgCoreAddress: "0x0" as `0x${string}` 
+      });
+      
+      if (shouldRedirect) {
+        console.log('No organization found (error), redirecting to home');
+        setTimeout(() => {
+          router.replace('/');
+        }, 1000);
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userAddress, isWalletConnected, factoryContract, router]);
 
   useEffect(() => {
-    fetchContracts();
-  }, [userAddress, isWalletConnected, factoryContract]);
+    if (isWalletConnected && userAddress && factoryContract) {
+      fetchContracts();
+    }
+  }, [fetchContracts, isWalletConnected, userAddress, factoryContract]);
 
-  const contextValue: ContractPairContextType = {
+  const contextValue: ContractPairContextType = useMemo(() => ({
     contractPair,
     isLoading,
     error,
-    refetch: fetchContracts
-  };
+    refetch: fetchContracts,
+    hasOrganization
+  }), [contractPair, isLoading, error, fetchContracts, hasOrganization]);
 
   return (
     <ContractPairContext.Provider value={contextValue}>

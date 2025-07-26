@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +12,6 @@ import {
 import { Plus } from "lucide-react";
 import DisbursementCard from "@/components/DisbursementCard";
 import ActiveSchedulesTable from "@/components/ActiveSchedulesTable";
-import { useContractPair } from "../ContractPairContext"; // Adjust path as needed
 
 interface Schedule {
   name: string;
@@ -25,8 +22,6 @@ interface Schedule {
 }
 
 const SchedulePage: React.FC = () => {
-  const { contractPair, isLoading, error, refetch } = useContractPair();
-  
   const activeSchedules: Schedule[] = [
     {
       name: "Monthly Payroll",
@@ -51,31 +46,8 @@ const SchedulePage: React.FC = () => {
     },
   ];
 
-  const handleCreateSchedule = () => {
-    // You now have access to contract addresses for blockchain interactions
-    console.log("Vault Address:", contractPair.vaultAddress);
-    console.log("Org Core Address:", contractPair.orgCoreAddress);
-    
-    // Implement your create schedule logic here
-    // This could involve calling smart contract functions
-  };
-
-  const handleRetryFailed = () => {
-    console.log("Retrying with contracts:", contractPair);
-    
-    // Implement retry logic here
-  };
-
   return (
     <div className="p-10 text-white">
-      <div className="mb-4 p-4 bg-gray-800 rounded-lg text-xs">
-        <p><strong>Debug Info:</strong></p>
-        <p>Vault: {contractPair.vaultAddress || "Not loaded"}</p>
-        <p>OrgCore: {contractPair.orgCoreAddress || "Not loaded"}</p>
-        <p>Loading: {isLoading ? "Yes" : "No"}</p>
-        <p>Error: {error || "None"}</p>
-      </div>
-
       {/* Disbursement Cards */}
       <div className="grid md:grid-cols-2 gap-10 mb-8">
         <DisbursementCard
@@ -100,7 +72,6 @@ const SchedulePage: React.FC = () => {
       {/* Action Buttons */}
       <div className="flex space-x-4 mb-8">
         <Button
-          onClick={handleCreateSchedule}
           className="text-white w-[238px] h-[36px] rounded-[61px] flex items-center space-x-2 transition-none"
           style={{ backgroundColor: "rgba(150, 118, 35, 1)" }}
         >
@@ -110,7 +81,6 @@ const SchedulePage: React.FC = () => {
           </span>
         </Button>
         <Button
-          onClick={handleRetryFailed}
           className="text-white w-[160px] h-[36px] rounded-[61px] transition-none"
           style={{ backgroundColor: "rgba(255, 255, 255, 0.13)" }}
         >
