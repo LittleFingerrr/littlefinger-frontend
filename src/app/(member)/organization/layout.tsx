@@ -1,4 +1,4 @@
-import { SidebarWrapper } from "@/components/organization-dashboard/sidebar/sidebar-wrapper";
+import { SidebarWrapper } from "@/components/organization-dashboard/organization-sidebar/sidebar-wrapper";
 import type React from "react";
 
 export default function MemberLayout({
