@@ -1,9 +1,16 @@
+import { DashboardContent } from "@/components/organization-dashboard/dashboard-content";
+import { DashboardHeader } from "@/components/organization-dashboard/dashboard-header";
 
-export default function MemberOrganizations() {
+export default function DashboardPage() {
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold">My Organizations</h1>
-      <p>View all organizations you're part of</p>
-    </div>
+    <>
+      {/* Header with Organization Selector and Connect Wallet */}
+      <DashboardHeader />
+
+      {/* Main Dashboard Content */}
+      <main className="flex-1 overflow-auto">
+        <DashboardContent />
+      </main>
+    </>
   );
 }
