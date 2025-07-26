@@ -1,7 +1,8 @@
+"use client";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { NavLinks } from "@/components/sidebar/nav";
-import { Logo } from "../logo";
+import { Logo } from "@/components/logo";
+import { NavLinks } from "./nav";
 
 export function Sidebar({
   isCollapsed,
@@ -14,7 +15,7 @@ export function Sidebar({
 }) {
   const desktopSidebarContent = (
     <>
-      <div className="absolute w-[50%] h-[20%] bottom-0 -left-10  bg-primary-glow rounded-[5.21875rem] blur-[3.125rem] pointer-events-none" />
+      <div className="absolute w-[50%] h-[20%] bottom-0 -left-10 bg-primary-glow rounded-[5.21875rem] blur-[3.125rem] pointer-events-none" />
       <Logo isCollapsed={isCollapsed} />
       <div className="flex-grow">
         <NavLinks isCollapsed={isCollapsed} />
@@ -42,7 +43,6 @@ export function Sidebar({
           </SheetContent>
         </Sheet>
       </div>
-
       {/* Desktop sidebar */}
       <aside
         className={cn(
