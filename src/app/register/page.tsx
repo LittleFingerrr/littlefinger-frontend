@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import logo from "../../../public/logo.svg";
 import backgroundImage from "../../../public/registerBackgroundImg.png";
+import { useAccount, useContract, useSendTransaction } from "@starknet-react/core";
+import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants";
+import { FACTORYABI } from "@/lib/abi/factory-abi";
+import { getUint256FromDecimal } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +25,65 @@ const Register = () => {
     adminAlias: "",
     adminWallet: "",
     token: "",
+    submit: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  
+  // Use available hooks
+  const { address: user, status, isConnected } = useAccount();
+  
+  const { contract } = useContract({
+    abi: FACTORYABI,
+    address: LITTLEFINGER_FACTORY_ADDRESS
+  });
+
+  // Generate random salt
+  const salt = BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
+
+  // Prepare contract calls
+  const calls = useMemo(() => {
+    const inputIsValid = formData.organization !== "" && 
+                        formData.description !== "" && 
+                        formData.adminAlias !== "" && 
+                        formData.adminWallet !== "" && 
+                        formData.token !== "";
+
+    if (!inputIsValid || !contract || !user) return;
+
+    return [
+      contract?.populate("setup_org", [
+        getUint256FromDecimal("0"), // available_funds (dummy)
+        getUint256FromDecimal("0"), // starting_bonus_allocation (dummy)
+        formData.token || STARKGATE_STRK_ADDRESS, // token
+        salt, // salt
+        formData.adminWallet || user, // owner
+        formData.organization, // name
+        "", // ipfs_url (dummy)
+        "", // first_admin_fname (dummy)
+        "", // first_admin_lname (dummy)
+        formData.adminAlias, // first_admin_alias
+      ])
+    ];
+  }, [
+    formData.organization,
+    formData.description,
+    formData.adminAlias,
+    formData.adminWallet,
+    formData.token,
+    contract,
+    user,
+    salt
+  ]);
+
+  const {
+    sendAsync,
+    isPending,
+    isError,
+    error
+  } = useSendTransaction({
+    calls
   });
 
   const handleChange = (
@@ -40,6 +104,7 @@ const Register = () => {
         ? ""
         : "Admin Wallet Address is required",
       token: formData.token ? "" : "Please select a token",
+      submit: "",
     };
 
     setErrors(newErrors);
@@ -47,11 +112,32 @@ const Register = () => {
     return Object.values(newErrors).every((error) => error === "");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    
+    // Check if wallet is connected
+    if (!isConnected) {
+      setErrors((prev) => ({ ...prev, submit: "Please connect your wallet first." }));
+      return;
+    }
 
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
+    setIsSubmitting(true);
+    try {
+      console.log('Starting organization deployment...');
+      const result = await sendAsync();
+      console.log('Deployment result:', result);
+      
+      // Store organization name in localStorage for future use
+      localStorage.setItem("organizationName", formData.organization);
+      
+      // On success, redirect to dashboard
+      router.push("/organization/dashboard");
+    } catch (err) {
+      console.error("Registration error:", err);
+      setErrors((prev) => ({ ...prev, submit: "Registration failed. Please try again." }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -60,8 +146,8 @@ const Register = () => {
       <Image
         src={backgroundImage}
         alt="background"
-        layout="fill"
-        objectFit="cover"
+        fill
+        style={{ objectFit: "cover" }}
         className="absolute"
       />
 
@@ -205,12 +291,24 @@ const Register = () => {
             )}
           </div>
 
+          {errors.submit && (
+            <p className="text-red-500 text-sm">{errors.submit}</p>
+          )}
+          
+          {isError && error && (
+            <p className="text-red-500 text-sm">Transaction failed: {error.message}</p>
+          )}
           <button
             type="submit"
             className=" flex justify-end float-end rounded-full  bg-gradient-to-r from-yellow-600 to-yellow-600 text-white px-10 py-3 py  mt-5 hover:opacity-90"
+            disabled={!isConnected || isSubmitting || isPending}
           >
-            Continue
+            {isSubmitting || isPending ? "Registering..." : "Continue"}
           </button>
+
+          {!isConnected && (
+            <p className="text-center text-sm text-muted-foreground mt-2">Please connect your wallet to continue</p>
+          )}
         </form>
       </div>
     </div>
