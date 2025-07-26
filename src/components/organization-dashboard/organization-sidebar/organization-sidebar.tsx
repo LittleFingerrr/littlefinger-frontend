@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { NavLinks } from "./nav";
 
-export function Sidebar({
+export function OrganizationSidebar({
   isCollapsed,
   isMobileMenuOpen,
   setMobileMenuOpen,

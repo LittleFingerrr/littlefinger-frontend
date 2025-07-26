@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Sidebar } from "./organization-sidebar";
+import { OrganizationSidebar } from "./organization-sidebar";
 
 export function SidebarWrapper() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <Sidebar
+    <OrganizationSidebar
       isCollapsed={isCollapsed}
       isMobileMenuOpen={isMobileMenuOpen}
       setMobileMenuOpen={setMobileMenuOpen}
