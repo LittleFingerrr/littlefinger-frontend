@@ -1,4 +1,3 @@
-import { SidebarWrapper } from "@/components/organization-dashboard/organization-sidebar/sidebar-wrapper";
 import type React from "react";
 
 export default function MemberLayout({
@@ -8,13 +7,8 @@ export default function MemberLayout({
 }) {
   return (
     <div className="flex h-screen bg-black">
-      {/* Sidebar Wrapper */}
-      <SidebarWrapper />
-
-      {/* Main Content - offset by sidebar width */}
-      <div className="flex-1 flex flex-col overflow-hidden lg:ml-64">
-        {children}
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">{children}</div>
     </div>
   );
 }
