@@ -56,6 +56,19 @@ export function MemberSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
 
   return (
     <Sidebar className="border-r-1 border-gray-800 bg-inherit px-3 " {...props}>
+
+        {/* Gradient overlay at bottom left */}
+      <div
+        className="absolute bottom-0 left-0 pointer-events-none"
+        style={{
+          width: "267px",
+          height: "267px",
+          background: "radial-gradient(circle, #F3A42C4D 30%, transparent 70%)",
+          borderRadius: "113.5px",
+          transform: "translate(-50%, 50%)",
+        }}
+      />
+
       <SidebarHeader className="">
         <div className="flex items-center justify-center  py-1">
           <div className="flex items-center gap-2">
