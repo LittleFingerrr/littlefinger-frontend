@@ -1,7 +1,7 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { Logo } from "@/components/sidebar/logo";
 import { NavLinks } from "@/components/sidebar/nav";
+import { Logo } from "../logo";
 
 export function Sidebar({
   isCollapsed,
