@@ -5,7 +5,7 @@ import Image from "next/image";
 import logo from "../../../public/logo.svg";
 import backgroundImage from "../../../public/registerBackgroundImg.png";
 import { useAccount, useContract, useSendTransaction } from "@starknet-react/core";
-import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants";
+import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS, STARKGATE_ETH_ADDRESS, STARKGATE_USDC_ADDRESS, STARKGATE_USDT_ADDRESS } from "@/lib/constants";
 import { FACTORYABI } from "@/lib/abi/factory-abi";
 import { getUint256FromDecimal } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -253,10 +253,9 @@ const Register = () => {
                   className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 pt-8 pb-3 rounded-lg outline-none h-[64px] text-sm focus:bg-[#333333] transition-colors appearance-none cursor-pointer"
                 >
                   <option value="">Select Token</option>
-                  <option value="ETH">ETH</option>
-                  <option value="DAI">STRK</option>
-                  <option value="USDT">USDT</option>
-                  <option value="USDT">USDC</option>
+                  <option value={STARKGATE_ETH_ADDRESS}>ETH</option>
+                  <option value={STARKGATE_USDC_ADDRESS}>USDC</option>
+                  <option value={STARKGATE_USDT_ADDRESS}>USDT</option>
                 </select>
 
                 <label
