@@ -106,6 +106,10 @@ export const FACTORYABI = [
           {
             "name": "first_admin_alias",
             "type": "core::felt252"
+          },
+          {
+            "name": "organization_type",
+            "type": "core::integer::u8"
           }
         ],
         "outputs": [

@@ -70,28 +70,6 @@ export const COREABI = [
     "interface_name": "littlefinger::interfaces::imember_manager::IMemberManager"
   },
   {
-    "type": "enum",
-    "name": "littlefinger::structs::member_structs::MemberRole",
-    "variants": [
-      {
-        "name": "None",
-        "type": "()"
-      },
-      {
-        "name": "EMPLOYEE",
-        "type": "core::integer::u16"
-      },
-      {
-        "name": "ADMIN",
-        "type": "core::integer::u16"
-      },
-      {
-        "name": "CONTRACTOR",
-        "type": "core::integer::u16"
-      }
-    ]
-  },
-  {
     "type": "struct",
     "name": "core::integer::u256",
     "members": [
@@ -116,6 +94,28 @@ export const COREABI = [
       {
         "name": "None",
         "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "littlefinger::structs::member_structs::MemberRole",
+    "variants": [
+      {
+        "name": "None",
+        "type": "()"
+      },
+      {
+        "name": "EMPLOYEE",
+        "type": "core::integer::u16"
+      },
+      {
+        "name": "ADMIN",
+        "type": "core::integer::u16"
+      },
+      {
+        "name": "CONTRACTOR",
+        "type": "core::integer::u16"
       }
     ]
   },
@@ -277,7 +277,7 @@ export const COREABI = [
           },
           {
             "name": "role",
-            "type": "littlefinger::structs::member_structs::MemberRole"
+            "type": "core::integer::u16"
           },
           {
             "name": "address",
@@ -381,6 +381,22 @@ export const COREABI = [
           }
         ],
         "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_member_base_pay",
+        "inputs": [
+          {
+            "name": "member_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
         "state_mutability": "external"
       },
       {
@@ -540,46 +556,6 @@ export const COREABI = [
     ]
   },
   {
-    "type": "struct",
-    "name": "littlefinger::structs::member_structs::Member",
-    "members": [
-      {
-        "name": "id",
-        "type": "core::integer::u256"
-      },
-      {
-        "name": "address",
-        "type": "core::starknet::contract_address::ContractAddress"
-      },
-      {
-        "name": "status",
-        "type": "littlefinger::structs::member_structs::MemberStatus"
-      },
-      {
-        "name": "role",
-        "type": "littlefinger::structs::member_structs::MemberRole"
-      },
-      {
-        "name": "base_pay",
-        "type": "core::integer::u256"
-      }
-    ]
-  },
-  {
-    "type": "enum",
-    "name": "core::bool",
-    "variants": [
-      {
-        "name": "False",
-        "type": "()"
-      },
-      {
-        "name": "True",
-        "type": "()"
-      }
-    ]
-  },
-  {
     "type": "interface",
     "name": "littlefinger::interfaces::idisbursement::IDisbursement",
     "items": [
@@ -609,37 +585,15 @@ export const COREABI = [
       },
       {
         "type": "function",
-        "name": "pause_disbursement_schedule",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
+        "name": "pause_disbursement",
+        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
       {
         "type": "function",
         "name": "resume_schedule",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "delete_schedule",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
+        "inputs": [],
         "outputs": [],
         "state_mutability": "external"
       },
@@ -664,53 +618,6 @@ export const COREABI = [
           }
         ],
         "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "retry_failed_disbursement",
-        "inputs": [
-          {
-            "name": "schedule_id",
-            "type": "core::integer::u64"
-          }
-        ],
-        "outputs": [],
-        "state_mutability": "external"
-      },
-      {
-        "type": "function",
-        "name": "get_pending_failed_disbursements",
-        "inputs": [],
-        "outputs": [],
-        "state_mutability": "view"
-      },
-      {
-        "type": "function",
-        "name": "add_failed_disbursement",
-        "inputs": [
-          {
-            "name": "member",
-            "type": "littlefinger::structs::member_structs::Member"
-          },
-          {
-            "name": "disbursement_id",
-            "type": "core::integer::u256"
-          },
-          {
-            "name": "timestamp",
-            "type": "core::integer::u64"
-          },
-          {
-            "name": "caller",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
-        "outputs": [
-          {
-            "type": "core::bool"
-          }
-        ],
-        "state_mutability": "external"
       },
       {
         "type": "function",
@@ -742,7 +649,7 @@ export const COREABI = [
         "inputs": [
           {
             "name": "member",
-            "type": "littlefinger::structs::member_structs::Member"
+            "type": "littlefinger::structs::member_structs::MemberResponse"
           },
           {
             "name": "total_bonus_available",
@@ -868,6 +775,20 @@ export const COREABI = [
     ]
   },
   {
+    "type": "enum",
+    "name": "littlefinger::structs::organization::OrganizationType",
+    "variants": [
+      {
+        "name": "CENTRALIZED",
+        "type": "()"
+      },
+      {
+        "name": "DECENTRALIZED",
+        "type": "()"
+      }
+    ]
+  },
+  {
     "type": "struct",
     "name": "littlefinger::structs::organization::OrganizationInfo",
     "members": [
@@ -898,6 +819,10 @@ export const COREABI = [
       {
         "name": "created_at",
         "type": "core::integer::u64"
+      },
+      {
+        "name": "organization_type",
+        "type": "littlefinger::structs::organization::OrganizationType"
       }
     ]
   },
@@ -961,59 +886,243 @@ export const COREABI = [
   {
     "type": "impl",
     "name": "VotingImpl",
-    "interface_name": "littlefinger::interfaces::voting::IVote"
+    "interface_name": "littlefinger::interfaces::dao_controller::IVote"
   },
   {
     "type": "enum",
-    "name": "littlefinger::structs::voting::PollStatus",
+    "name": "littlefinger::structs::member_structs::InviteStatus",
     "variants": [
       {
-        "name": "Pending",
+        "name": "PENDING",
         "type": "()"
       },
       {
-        "name": "Started",
+        "name": "ACCEPTED",
         "type": "()"
       },
       {
-        "name": "Finished",
+        "name": "REJECTED",
+        "type": "()"
+      },
+      {
+        "name": "EXPIRED",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::member_structs::MemberInvite",
+    "members": [
+      {
+        "name": "address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "role",
+        "type": "littlefinger::structs::member_structs::MemberRole"
+      },
+      {
+        "name": "base_pay",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "invite_status",
+        "type": "littlefinger::structs::member_structs::InviteStatus"
+      },
+      {
+        "name": "expiry",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::dao_controller::ADDMEMBER",
+    "members": [
+      {
+        "name": "member",
+        "type": "littlefinger::structs::member_structs::MemberInvite"
+      },
+      {
+        "name": "member_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::dao_controller::UPDATEMEMBERBASEPAY",
+    "members": [
+      {
+        "name": "member_id",
+        "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::dao_controller::CHANGEMEMBERSTATUS",
+    "members": [
+      {
+        "name": "member_id",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "current_status",
+        "type": "littlefinger::structs::member_structs::MemberStatus"
+      },
+      {
+        "name": "proposed_status",
+        "type": "littlefinger::structs::member_structs::MemberStatus"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::dao_controller::SETCURRENTDISBURSEMENTSCHEDULE",
+    "members": [
+      {
+        "name": "schedule_id",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "previous_schedule",
+        "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+      },
+      {
+        "name": "new_schedule",
+        "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::dao_controller::CHANGESCHEDULESTATUS",
+    "members": [
+      {
+        "name": "schedule_id",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "previous_status",
+        "type": "littlefinger::structs::disbursement_structs::ScheduleStatus"
+      },
+      {
+        "name": "new_status",
+        "type": "littlefinger::structs::disbursement_structs::ScheduleStatus"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "littlefinger::structs::dao_controller::CHANGEORGANIZATIONTYPE",
+    "members": [
+      {
+        "name": "current_config",
+        "type": "littlefinger::structs::organization::OrganizationType"
+      },
+      {
+        "name": "new_config",
+        "type": "littlefinger::structs::organization::OrganizationType"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "littlefinger::structs::dao_controller::PollReason",
+    "variants": [
+      {
+        "name": "ADDMEMBER",
+        "type": "littlefinger::structs::dao_controller::ADDMEMBER"
+      },
+      {
+        "name": "UPDATEMEMBERBASEPAY",
+        "type": "littlefinger::structs::dao_controller::UPDATEMEMBERBASEPAY"
+      },
+      {
+        "name": "CHANGEMEMBERSTATUS",
+        "type": "littlefinger::structs::dao_controller::CHANGEMEMBERSTATUS"
+      },
+      {
+        "name": "SETCURRENTDISBURSEMENTSCHEDULE",
+        "type": "littlefinger::structs::dao_controller::SETCURRENTDISBURSEMENTSCHEDULE"
+      },
+      {
+        "name": "CHANGESCHEDULESTATUS",
+        "type": "littlefinger::structs::dao_controller::CHANGESCHEDULESTATUS"
+      },
+      {
+        "name": "CHANGEORGANIZATIONTYPE",
+        "type": "littlefinger::structs::dao_controller::CHANGEORGANIZATIONTYPE"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "enum",
+    "name": "littlefinger::structs::dao_controller::PollStatus",
+    "variants": [
+      {
+        "name": "ACTIVE",
+        "type": "()"
+      },
+      {
+        "name": "FINISHED",
         "type": "core::bool"
       }
     ]
   },
   {
     "type": "struct",
-    "name": "littlefinger::structs::voting::Poll",
+    "name": "littlefinger::structs::dao_controller::Poll",
     "members": [
       {
-        "name": "owner",
-        "type": "core::starknet::contract_address::ContractAddress"
-      },
-      {
-        "name": "name",
-        "type": "core::byte_array::ByteArray"
-      },
-      {
-        "name": "desc",
-        "type": "core::byte_array::ByteArray"
-      },
-      {
-        "name": "yes_votes",
+        "name": "proposer",
         "type": "core::integer::u256"
       },
       {
-        "name": "no_votes",
+        "name": "poll_id",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "reason",
+        "type": "littlefinger::structs::dao_controller::PollReason"
+      },
+      {
+        "name": "up_votes",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "down_votes",
         "type": "core::integer::u256"
       },
       {
         "name": "status",
-        "type": "littlefinger::structs::voting::PollStatus"
+        "type": "littlefinger::structs::dao_controller::PollStatus"
+      },
+      {
+        "name": "created_at",
+        "type": "core::integer::u64"
       }
     ]
   },
   {
     "type": "struct",
-    "name": "littlefinger::structs::voting::VotingConfig",
+    "name": "littlefinger::structs::dao_controller::VotingConfig",
     "members": [
       {
         "name": "private",
@@ -1035,23 +1144,19 @@ export const COREABI = [
   },
   {
     "type": "interface",
-    "name": "littlefinger::interfaces::voting::IVote",
+    "name": "littlefinger::interfaces::dao_controller::IVote",
     "items": [
       {
         "type": "function",
         "name": "create_poll",
         "inputs": [
           {
-            "name": "name",
-            "type": "core::byte_array::ByteArray"
-          },
-          {
-            "name": "desc",
-            "type": "core::byte_array::ByteArray"
-          },
-          {
             "name": "member_id",
             "type": "core::integer::u256"
+          },
+          {
+            "name": "reason",
+            "type": "littlefinger::structs::dao_controller::PollReason"
           }
         ],
         "outputs": [
@@ -1063,14 +1168,46 @@ export const COREABI = [
       },
       {
         "type": "function",
-        "name": "vote",
+        "name": "approve",
         "inputs": [
           {
-            "name": "support",
-            "type": "core::bool"
+            "name": "poll_id",
+            "type": "core::integer::u256"
           },
           {
-            "name": "id",
+            "name": "member_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "reject",
+        "inputs": [
+          {
+            "name": "poll_id",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "member_id",
+            "type": "core::integer::u256"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "set_threshold",
+        "inputs": [
+          {
+            "name": "new_threshold",
+            "type": "core::integer::u256"
+          },
+          {
+            "name": "member_id",
             "type": "core::integer::u256"
           }
         ],
@@ -1082,28 +1219,27 @@ export const COREABI = [
         "name": "get_poll",
         "inputs": [
           {
-            "name": "id",
+            "name": "poll_id",
             "type": "core::integer::u256"
           }
         ],
         "outputs": [
           {
-            "type": "littlefinger::structs::voting::Poll"
+            "type": "littlefinger::structs::dao_controller::Poll"
           }
         ],
         "state_mutability": "view"
       },
       {
         "type": "function",
-        "name": "end_poll",
-        "inputs": [
+        "name": "get_all_polls",
+        "inputs": [],
+        "outputs": [
           {
-            "name": "id",
-            "type": "core::integer::u256"
+            "type": "core::array::Array::<littlefinger::structs::dao_controller::Poll>"
           }
         ],
-        "outputs": [],
-        "state_mutability": "external"
+        "state_mutability": "view"
       },
       {
         "type": "function",
@@ -1111,11 +1247,55 @@ export const COREABI = [
         "inputs": [
           {
             "name": "config",
-            "type": "littlefinger::structs::voting::VotingConfig"
+            "type": "littlefinger::structs::dao_controller::VotingConfig"
           }
         ],
         "outputs": [],
         "state_mutability": "external"
+      },
+      {
+        "type": "function",
+        "name": "get_threshold",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u256"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_eligible_voters",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_eligible_pollers",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_eligible_executors",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<core::integer::u256>"
+          }
+        ],
+        "state_mutability": "view"
       }
     ]
   },
@@ -1218,6 +1398,10 @@ export const COREABI = [
       {
         "name": "deployer",
         "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "organization_type",
+        "type": "core::integer::u8"
       }
     ]
   },
@@ -1402,7 +1586,7 @@ export const COREABI = [
   },
   {
     "type": "event",
-    "name": "littlefinger::structs::voting::Voted",
+    "name": "littlefinger::structs::dao_controller::Voted",
     "kind": "struct",
     "members": [
       {
@@ -1414,17 +1598,130 @@ export const COREABI = [
         "name": "voter",
         "type": "core::starknet::contract_address::ContractAddress",
         "kind": "key"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "data"
       }
     ]
   },
   {
     "type": "event",
-    "name": "littlefinger::components::voting::VotingComponent::Event",
+    "name": "littlefinger::structs::dao_controller::PollResolved",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::integer::u256",
+        "kind": "key"
+      },
+      {
+        "name": "outcome",
+        "type": "core::bool",
+        "kind": "data"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "littlefinger::structs::dao_controller::PollCreated",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::integer::u256",
+        "kind": "key"
+      },
+      {
+        "name": "proposer",
+        "type": "core::starknet::contract_address::ContractAddress",
+        "kind": "key"
+      },
+      {
+        "name": "reason",
+        "type": "littlefinger::structs::dao_controller::PollReason",
+        "kind": "data"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "littlefinger::structs::dao_controller::PollStopped",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::integer::u256",
+        "kind": "key"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "key"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "littlefinger::structs::dao_controller::ThresholdChanged",
+    "kind": "struct",
+    "members": [
+      {
+        "name": "previous_threshold",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "new_threshold",
+        "type": "core::integer::u256",
+        "kind": "data"
+      },
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64",
+        "kind": "data"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "littlefinger::components::dao_controller::VotingComponent::Event",
     "kind": "enum",
     "variants": [
       {
         "name": "Voted",
-        "type": "littlefinger::structs::voting::Voted",
+        "type": "littlefinger::structs::dao_controller::Voted",
+        "kind": "nested"
+      },
+      {
+        "name": "PollResolved",
+        "type": "littlefinger::structs::dao_controller::PollResolved",
+        "kind": "nested"
+      },
+      {
+        "name": "PollCreated",
+        "type": "littlefinger::structs::dao_controller::PollCreated",
+        "kind": "nested"
+      },
+      {
+        "name": "PollStopped",
+        "type": "littlefinger::structs::dao_controller::PollStopped",
+        "kind": "nested"
+      },
+      {
+        "name": "ThresholdChanged",
+        "type": "littlefinger::structs::dao_controller::ThresholdChanged",
         "kind": "nested"
       }
     ]
@@ -1462,7 +1759,7 @@ export const COREABI = [
       },
       {
         "name": "VotingEvent",
-        "type": "littlefinger::components::voting::VotingComponent::Event",
+        "type": "littlefinger::components::dao_controller::VotingComponent::Event",
         "kind": "flat"
       },
       {

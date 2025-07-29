@@ -5,6 +5,7 @@ import { useContract, useProvider, useAccount } from '@starknet-react/core';
 import { useRouter } from 'next/navigation';
 import { LITTLEFINGER_FACTORY_ADDRESS } from '@/lib/constants';
 import { FACTORYABI } from '@/lib/abi/factory-abi';
+import { contractAddressToHex } from '@/lib/utils';
 
 interface ContractPair {
   vaultAddress: `0x${string}`;
@@ -88,9 +89,9 @@ export const ContractPairProvider: React.FC<ContractPairProviderProps> = ({
       const result = await factoryContract.get_vault_org_pair(userAddress);
       
       console.log('Factory contract result:', result);
-
-      const vaultAddress = result[0].toString() as `0x${string}`;
-      const orgCoreAddress = result[1].toString() as `0x${string}`;
+      
+      const orgCoreAddress = contractAddressToHex(result[0]);
+      const vaultAddress = contractAddressToHex(result[1]);
 
       console.log('Parsed addresses:', { vaultAddress, orgCoreAddress });
 

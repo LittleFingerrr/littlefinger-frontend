@@ -293,14 +293,6 @@ export const VAULTABI = [
         "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        "name": "available_funds",
-        "type": "core::integer::u256"
-      },
-      {
-        "name": "bonus_allocation",
-        "type": "core::integer::u256"
-      },
-      {
         "name": "owner",
         "type": "core::starknet::contract_address::ContractAddress"
       }
