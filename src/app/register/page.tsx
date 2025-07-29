@@ -2,61 +2,420 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useAccount, useContract } from "@starknet-react/core";
+import { useRouter } from "next/navigation";
 import logo from "../../../public/logo.svg";
 import backgroundImage from "../../../public/registerBackgroundImg.png";
+import { URLInputWithPreview } from "@/components/ui/url-input-with-preview";
+import { DynamicSocialContacts, SocialContact } from "@/components/ui/dynamic-social-contacts";
+import { pinataService, OrganizationMetadata } from "@/lib/pinata";
+import { FACTORYABI } from "@/lib/abi/factory-abi";
+import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants";
+
+interface FormData {
+  // Basic Organization Info
+  organization: string;
+  description: string;
+  website: string;
+  socialContacts: SocialContact[];
+  logoUri: string;
+  legalDocument: string;
+
+  // Admin Info
+  first_admin_fname: string;
+  first_admin_lname: string;
+  first_admin_alias: string;
+  adminWallet: string;
+
+  // Contract Info
+  token: string;
+  organization_type: number;
+}
+
+interface FormErrors {
+  [key: string]: string;
+}
+
+const STEPS = [
+  { id: 1, title: "Organization Details", description: "Basic organization information" },
+  { id: 2, title: "Contact & Media", description: "Social contacts and media assets" },
+  { id: 3, title: "Admin Information", description: "Administrator details" },
+  { id: 4, title: "Contract Setup", description: "Blockchain configuration" },
+];
+
+const TOKEN_OPTIONS = [
+  { value: STARKGATE_STRK_ADDRESS, label: "STRK" },
+  { value: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", label: "ETH" },
+  { value: "0x00da114221cb83fa859dbdb4c44beeaa0bb37c7537ad5ae66fe5e0efd20e6eb3", label: "DAI" },
+  { value: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8", label: "USDT" },
+  { value: "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8", label: "USDC" },
+];
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    organization: "",
-    description: "",
-    adminAlias: "",
-    adminWallet: "",
-    token: "",
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+
+  const { address: userAddress, isConnected } = useAccount();
+  const { contract: factoryContract } = useContract({
+    abi: FACTORYABI,
+    address: LITTLEFINGER_FACTORY_ADDRESS,
   });
 
-  const [errors, setErrors] = useState({
+  const [formData, setFormData] = useState<FormData>({
     organization: "",
     description: "",
-    adminAlias: "",
-    adminWallet: "",
+    website: "",
+    socialContacts: [],
+    logoUri: "",
+    legalDocument: "",
+    first_admin_fname: "",
+    first_admin_lname: "",
+    first_admin_alias: "",
+    adminWallet: userAddress || "",
     token: "",
+    organization_type: 1,
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const handleInputChange = (field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
   };
 
-  const validateForm = () => {
-    const newErrors = {
-      organization: formData.organization
-        ? ""
-        : "Organization Name is required",
-      description: formData.description ? "" : "Description is required",
-      adminAlias: formData.adminAlias ? "" : "Admin Alias is required",
-      adminWallet: formData.adminWallet
-        ? ""
-        : "Admin Wallet Address is required",
-      token: formData.token ? "" : "Please select a token",
+  const validateStep = (step: number): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Helper function to validate URL format
+    const isValidUrl = (url: string): boolean => {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
     };
 
-    setErrors(newErrors);
+    switch (step) {
+      case 1:
+        if (!formData.organization.trim()) newErrors.organization = "Organization name is required";
+        if (!formData.description.trim()) newErrors.description = "Description is required";
 
-    return Object.values(newErrors).every((error) => error === "");
+        // Validate optional website field if provided
+        if (formData.website && formData.website.trim() !== "" && !isValidUrl(formData.website)) {
+          newErrors.website = "Please enter a valid website URL";
+        }
+        break;
+
+      case 2:
+        // Validate optional social contacts if provided
+        if (formData.socialContacts.length > 0) {
+          for (let i = 0; i < formData.socialContacts.length; i++) {
+            const contact = formData.socialContacts[i];
+            if (contact.platform && !contact.handle.trim()) {
+              newErrors.socialContacts = `Handle is required for ${contact.platform}`;
+              break;
+            }
+            if (contact.handle && !contact.platform.trim()) {
+              newErrors.socialContacts = "Platform is required when handle is provided";
+              break;
+            }
+          }
+        }
+
+        // Validate optional logo URI if provided
+        if (formData.logoUri && formData.logoUri.trim() !== "" && !isValidUrl(formData.logoUri)) {
+          newErrors.logoUri = "Please enter a valid logo URL";
+        }
+
+        // Validate optional legal document URL if provided
+        if (formData.legalDocument && formData.legalDocument.trim() !== "" && !isValidUrl(formData.legalDocument)) {
+          newErrors.legalDocument = "Please enter a valid legal document URL";
+        }
+        break;
+
+      case 3:
+        if (!formData.first_admin_fname.trim()) newErrors.first_admin_fname = "First name is required";
+        if (!formData.first_admin_lname.trim()) newErrors.first_admin_lname = "Last name is required";
+        if (!formData.first_admin_alias.trim()) newErrors.first_admin_alias = "Admin alias is required";
+        if (!formData.adminWallet.trim()) newErrors.adminWallet = "Admin wallet address is required";
+        break;
+
+      case 4:
+        if (!formData.token) newErrors.token = "Please select a token";
+        if (!formData.organization_type || formData.organization_type < 1) newErrors.organization_type = "Organization type is required";
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      console.log("Form submitted:", formData);
+    if (!validateStep(currentStep) || !isConnected || !userAddress || !factoryContract) {
+      if (!isConnected) {
+        alert("Please connect your wallet first");
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. Prepare metadata for IPFS
+      const metadata: OrganizationMetadata = {
+        name: formData.organization,
+        description: formData.description,
+        website: formData.website || undefined,
+        socialContacts: formData.socialContacts,
+        logoUri: formData.logoUri || undefined,
+        legalDocument: formData.legalDocument || undefined,
+        adminFirstName: formData.first_admin_fname,
+        adminLastName: formData.first_admin_lname,
+        adminAlias: formData.first_admin_alias,
+        adminWallet: formData.adminWallet,
+        token: formData.token,
+        organizationType: formData.organization_type,
+        createdAt: new Date().toISOString(),
+        version: "1.0",
+      };
+
+      // 2. Upload to Pinata
+      console.log("Uploading metadata to IPFS...");
+      const ipfsUrl = await pinataService.uploadMetadata(metadata);
+      console.log("IPFS URL:", ipfsUrl);
+
+      // 3. Deploy contract
+      console.log("Deploying organization contract...");
+      const salt = Math.floor(Math.random() * 1000000).toString();
+
+      const result = await factoryContract.setup_org(
+        formData.token,
+        salt,
+        userAddress,
+        formData.organization,
+        ipfsUrl,
+        formData.first_admin_fname,
+        formData.first_admin_lname,
+        formData.first_admin_alias,
+        formData.organization_type
+      );
+
+      console.log("Organization deployed successfully:", result);
+
+      // Redirect to dashboard
+      router.push("/dashboard");
+
+    } catch (error) {
+      console.error("Error creating organization:", error);
+      alert("Failed to create organization. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-4">
+            <div>
+              <div className="relative group">
+                <input
+                  name="organization"
+                  placeholder="Organization Name"
+                  value={formData.organization}
+                  onChange={(e) => handleInputChange("organization", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.organization && <p className="text-red-500 text-sm mt-1">{errors.organization}</p>}
+            </div>
+
+            <div>
+              <div className="relative group">
+                <textarea
+                  name="description"
+                  placeholder="Organization Description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[100px] focus:bg-[#333333] transition-colors resize-none"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+            </div>
+
+            <div>
+              <input
+                name="website"
+                placeholder="Organization Website (Optional)"
+                value={formData.website}
+                onChange={(e) => handleInputChange("website", e.target.value)}
+                className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+              />
+              {errors.website && <p className="text-red-500 text-sm mt-1">{errors.website}</p>}
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <DynamicSocialContacts
+              socialContacts={formData.socialContacts}
+              setSocialContacts={(contacts) => handleInputChange("socialContacts", contacts)}
+              error={errors.socialContacts}
+            />
+
+            <URLInputWithPreview
+              id="logoUri"
+              label="Logo"
+              placeholder="Logo URL (Optional)"
+              value={formData.logoUri}
+              onChange={(value) => handleInputChange("logoUri", value)}
+              error={errors.logoUri}
+            />
+
+            <URLInputWithPreview
+              id="legalDocument"
+              label="Legal Document"
+              placeholder="Legal Document URL (Optional)"
+              value={formData.legalDocument}
+              onChange={(value) => handleInputChange("legalDocument", value)}
+              error={errors.legalDocument}
+            />
+
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-4">
+            <div>
+              <div className="relative group">
+                <input
+                  name="first_admin_fname"
+                  placeholder="Admin First Name"
+                  value={formData.first_admin_fname}
+                  onChange={(e) => handleInputChange("first_admin_fname", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.first_admin_fname && <p className="text-red-500 text-sm mt-1">{errors.first_admin_fname}</p>}
+            </div>
+
+            <div>
+              <div className="relative group">
+                <input
+                  name="first_admin_lname"
+                  placeholder="Admin Last Name"
+                  value={formData.first_admin_lname}
+                  onChange={(e) => handleInputChange("first_admin_lname", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.first_admin_lname && <p className="text-red-500 text-sm mt-1">{errors.first_admin_lname}</p>}
+            </div>
+
+            <div>
+              <div className="relative group">
+                <input
+                  name="first_admin_alias"
+                  placeholder="Admin Alias"
+                  value={formData.first_admin_alias}
+                  onChange={(e) => handleInputChange("first_admin_alias", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.first_admin_alias && <p className="text-red-500 text-sm mt-1">{errors.first_admin_alias}</p>}
+            </div>
+
+            <div>
+              <div className="relative group">
+                <input
+                  name="adminWallet"
+                  placeholder="Admin Wallet Address"
+                  value={formData.adminWallet}
+                  onChange={(e) => handleInputChange("adminWallet", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.adminWallet && <p className="text-red-500 text-sm mt-1">{errors.adminWallet}</p>}
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-4">
+            <div>
+              <div className="relative group">
+                <select
+                  name="token"
+                  value={formData.token}
+                  onChange={(e) => handleInputChange("token", e.target.value)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 pt-8 pb-3 rounded-lg outline-none h-[64px] text-sm focus:bg-[#333333] transition-colors appearance-none cursor-pointer"
+                >
+                  <option value="">Select Token</option>
+                  {TOKEN_OPTIONS.map((token) => (
+                    <option key={token.value} value={token.value}>{token.label}</option>
+                  ))}
+                </select>
+                <label className="absolute top-2 left-3 text-xs text-gray-400 pointer-events-none">Token</label>
+                <div className="absolute top-7 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none mt-2">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              {errors.token && <p className="text-red-500 text-sm mt-1">{errors.token}</p>}
+            </div>
+
+            <div>
+              <div className="relative group">
+                <input
+                  name="organization_type"
+                  placeholder="Organization Type"
+                  value={formData.organization_type}
+                  onChange={(e) => handleInputChange("organization_type", parseInt(e.target.value) || 0)}
+                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
+                />
+                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+              </div>
+              {errors.organization_type && <p className="text-red-500 text-sm mt-1">{errors.organization_type}</p>}
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="relative min-h-screen ov flex items-center justify-center bg-[#070602] overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-[#070602] overflow-hidden">
       <Image
         src={backgroundImage}
         alt="background"
@@ -66,7 +425,7 @@ const Register = () => {
       />
 
       <div
-        className="relative z-10 p-10 rounded-2xl w-full max-w-md md:max-w-lg shadow-lg"
+        className="relative z-10 p-10 rounded-2xl w-full max-w-2xl shadow-lg"
         style={{
           background: `linear-gradient(to left, #FF9B28 0%, #8B4513 0%, #070602 50%, #070602 100%)`,
         }}
@@ -74,143 +433,75 @@ const Register = () => {
         <div className="flex justify-center mb-6">
           <Image src={logo} alt="Logo" width={100} height={100} />
         </div>
+
         <h2 className="text-2xl font-semibold text-center text-white sm:text-4xl sm:font-bold mb-3">
-          Welcome User
+          Register Organization
         </h2>
-        <p className="text-lg text-center text-white mb-6">
-          please enter your details to sign in
+
+        <p className="text-lg text-center text-white mb-8">
+          Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1]?.title}
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <div className="space-y-2">
-              <div className="relative group">
-                <input
-                  name="organization"
-                  placeholder="Organization Name"
-                  value={formData.organization}
-                  onChange={handleChange}
-                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
-                />
-                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            {STEPS.map((step) => (
+              <div
+                key={step.id}
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step.id <= currentStep
+                  ? "bg-[#FF9B28] text-white"
+                  : "bg-gray-600 text-gray-300"
+                  }`}
+              >
+                {step.id}
               </div>
-            </div>
-            {errors.organization && (
-              <p className="text-red-500 text-sm">{errors.organization}</p>
+            ))}
+          </div>
+          <div className="w-full bg-gray-600 rounded-full h-2">
+            <div
+              className="bg-[#FF9B28] h-2 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {renderStepContent()}
+
+          <div className="flex justify-between mt-8">
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className={`px-6 py-3 rounded-lg font-medium ${currentStep === 1
+                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                : "bg-gray-700 text-white hover:bg-gray-600"
+                } transition-colors`}
+            >
+              Previous
+            </button>
+
+            {currentStep < STEPS.length ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-600 text-white font-medium hover:opacity-90 transition-opacity"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isSubmitting || !isConnected}
+                className={`px-6 py-3 rounded-lg font-medium transition-opacity ${isSubmitting || !isConnected
+                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-yellow-600 to-yellow-600 text-white hover:opacity-90"
+                  }`}
+              >
+                {isSubmitting ? "Creating..." : "Create Organization"}
+              </button>
             )}
           </div>
-
-          <div>
-            <div className="space-y-2">
-              <div className="relative group">
-                <input
-                  name="description"
-                  placeholder="Description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white  text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
-                />
-                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
-              </div>
-            </div>
-
-            {errors.description && (
-              <p className="text-red-500 text-sm">{errors.description}</p>
-            )}
-          </div>
-
-          <div>
-            <div className="space-y-2">
-              <div className="relative group">
-                <input
-                  name="adminAlias"
-                  placeholder="Admin Alias"
-                  value={formData.adminAlias}
-                  onChange={handleChange}
-                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
-                />
-                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
-              </div>
-            </div>
-
-            {errors.adminAlias && (
-              <p className="text-red-500 text-sm">{errors.adminAlias}</p>
-            )}
-          </div>
-
-          <div>
-            <div className="space-y-2 text-white">
-              <div className="relative group">
-                <input
-                  name="adminWallet"
-                  placeholder="Admin Wallet Address"
-                  value={formData.adminWallet}
-                  onChange={handleChange}
-                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white  p-3 rounded-lg  h-[64px] focus:bg-[#333333] focus:text-white outline-none transition-colors"
-                />
-                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
-              </div>
-            </div>
-
-            {errors.adminWallet && (
-              <p className="text-red-500 text-sm">{errors.adminWallet}</p>
-            )}
-          </div>
-
-          <div>
-            <div className="space-y-2">
-              <div className="relative group ">
-                <select
-                  name="token"
-                  value={formData.token}
-                  onChange={handleChange}
-                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 pt-8 pb-3 rounded-lg outline-none h-[64px] text-sm focus:bg-[#333333] transition-colors appearance-none cursor-pointer"
-                >
-                  <option value="">Select Token</option>
-                  <option value="ETH">ETH</option>
-                  <option value="DAI">STRK</option>
-                  <option value="USDT">USDT</option>
-                  <option value="USDT">USDC</option>
-                </select>
-
-                <label
-                  htmlFor="token"
-                  className="absolute top-2 left-3 text-xs text-gray-400 pointer-events-none"
-                >
-                  Token
-                </label>
-
-                <div className="absolute top-7 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28 transition-colors"></div>
-
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none mt-2">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {errors.token && (
-              <p className="text-red-500 text-sm">{errors.token}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className=" flex justify-end float-end rounded-full  bg-gradient-to-r from-yellow-600 to-yellow-600 text-white px-10 py-3 py  mt-5 hover:opacity-90"
-          >
-            Continue
-          </button>
         </form>
       </div>
     </div>
