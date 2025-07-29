@@ -1,20 +1,29 @@
+"use client"
+
 import type React from "react"
 import { MemberSidebar } from "@/components/member-sidebar"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { MobileHeader } from "@/components/member-mobile"
+import { MobileHeader } from "@/components/member-mobile-header"
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+
+  const isMobile = useIsMobile();
+
   return (
-    <SidebarProvider>
-      <MemberSidebar />
-      <SidebarInset>
+  <>
+    <div className="flex min-h-screen">
+      {/* Render MemberSidebar only on desktop */}
+      {!isMobile && <MemberSidebar /> }
+
+      <div className="flex flex-col flex-1">
         <MobileHeader />
-        <main className="flex flex-1 flex-col min-h-screen">{children}</main>
-      </SidebarInset>
-    </SidebarProvider>
+        <main className="flex-1 p-4">{children}</main>
+      </div>
+    </div>
+  </>
   )
 }
