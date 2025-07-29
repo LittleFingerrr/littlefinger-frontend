@@ -5,7 +5,7 @@ import { MemberSidebar } from "@/components/member-sidebar"
 import { MobileHeader } from "@/components/member-mobile-header"
 import { useIsMobile } from "@/hooks/use-mobile";
 
-export default function DashboardLayout({
+export default function MemberLayout({
   children,
 }: {
   children: React.ReactNode
