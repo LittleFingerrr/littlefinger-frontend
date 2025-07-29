@@ -45,26 +45,26 @@ const Register = () => {
 
   // Prepare contract calls
   const calls = useMemo(() => {
-    const inputIsValid = formData.organization !== "" && 
-                        formData.description !== "" && 
-                        formData.adminAlias !== "" && 
-                        formData.adminWallet !== "" && 
-                        formData.token !== "";
+    const inputIsValid = formData.organization !== "" &&
+      formData.description !== "" &&
+      formData.adminAlias !== "" &&
+      formData.adminWallet !== "" &&
+      formData.token !== ""; // ensure token is selected
 
     if (!inputIsValid || !contract || !user) return;
 
     return [
-      contract?.populate("setup_org", [
+      contract.populate("setup_org", [
         getUint256FromDecimal("0"), // available_funds (dummy)
         getUint256FromDecimal("0"), // starting_bonus_allocation (dummy)
-        formData.token || STARKGATE_STRK_ADDRESS, // token
-        salt, // salt
-        formData.adminWallet || user, // owner
-        formData.organization, // name
-        "", // ipfs_url (dummy)
-        "", // first_admin_fname (dummy)
-        "", // first_admin_lname (dummy)
-        formData.adminAlias, // first_admin_alias
+        formData.token, // always a valid address
+        salt,
+        formData.adminWallet || user,
+        formData.organization,
+        "",
+        "",
+        "",
+        formData.adminAlias,
       ])
     ];
   }, [
