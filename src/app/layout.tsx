@@ -3,6 +3,7 @@ import { Inter, Lato } from "next/font/google";
 import { Montserrat_Subrayada as MontserratSubrayada } from "next/font/google";
 import "./globals.css";
 import { StarknetProvider } from "@/components/StarknetProvider";
+import { Toaster } from "sonner"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${fontMontserratSubrayada.variable} ${fontLato.variable} bg-regal-black text-white`}>
         <StarknetProvider>
           {children}
+          <Toaster />
         </StarknetProvider>
       </body>
     </html>
