@@ -9,6 +9,7 @@ import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS, STARKGATE_ETH_ADD
 import { FACTORYABI } from "@/lib/abi/factory-abi";
 import { getUint256FromDecimal } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { ConnectWallet } from "@/components/connect-wallet";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -159,6 +160,9 @@ const Register = () => {
       >
         <div className="flex justify-center mb-6">
           <Image src={logo} alt="Logo" width={100} height={100} />
+        </div>
+        <div className="flex justify-center mb-6">
+          <ConnectWallet />
         </div>
         <h2 className="text-2xl font-semibold text-center text-white sm:text-4xl sm:font-bold mb-3">
           Welcome User
