@@ -4,7 +4,6 @@ import { useContractPair } from '@/app/(organization)/dashboard/ContractPairCont
 import { VAULTABI } from '@/lib/abi/vault-abi';
 import { COREABI } from '@/lib/abi/core-abi';
 import { uint256 } from 'starknet';
-import { contractAddressToHex, getTokenNameFromAddress } from '@/lib/utils';
 
 
 export interface DashboardMetrics {
@@ -15,12 +14,11 @@ export interface DashboardMetrics {
 
 export interface Disbursement {
   date: string;
+  type: string;
   amount: string;
   recipients: string;
-  status: 'completed' | 'pending' | 'failed';
+  status: string;
   txHash?: string;
-  type: string;
-  token: string;
 }
 
 export function useDashboardMetrics() {
@@ -76,83 +74,17 @@ export function useDashboardMetrics() {
         console.log('Error fetching member count:', error);
       }
 
-      // Fetch disbursement history from vault
-      let disbursementHistory: Disbursement[] = [];
-      try {
-        const transactionHistory = await vaultContract.get_transaction_history();
-        
-        
-        disbursementHistory = transactionHistory.map((tx: any) => {
-          const amount = typeof tx.amount === 'object' ? 
-            uint256.uint256ToBN(tx.amount) : BigInt(tx.amount);
-          const amountInEth = (Number(amount) / 1e18).toFixed(2);
-          
-          const tokenName = getTokenNameFromAddress(contractAddressToHex(tx.token));
-          
-          let transactionType = 'Unknown';
-          if (tx.transaction_type) {
-            if (tx.transaction_type.variant) {
-              const variant = tx.transaction_type.variant;
-              if (variant.DEPOSIT !== undefined) {
-                transactionType = 'DEPOSIT';
-              } else if (variant.WITHDRAWAL !== undefined) {
-                transactionType = 'WITHDRAWAL';
-              } else if (variant.PAYMENT !== undefined) {
-                transactionType = 'PAYMENT';
-              } else if (variant.BONUS_ALLOCATION !== undefined) {
-                transactionType = 'BONUS_ALLOCATION';
-              }
-            } else if (typeof tx.transaction_type === 'string') {
-              transactionType = tx.transaction_type;
-            } else if (tx.transaction_type.PAYMENT !== undefined) {
-              transactionType = 'PAYMENT';
-            } else if (tx.transaction_type.DEPOSIT !== undefined) {
-              transactionType = 'DEPOSIT';
-            } else if (tx.transaction_type.WITHDRAWAL !== undefined) {
-              transactionType = 'WITHDRAWAL';
-            } else if (tx.transaction_type.BONUS_ALLOCATION !== undefined) {
-              transactionType = 'BONUS_ALLOCATION';
-            } else if (Object.keys(tx.transaction_type).length === 0) {
-              transactionType = 'PAYMENT'; 
-            }
-          }
-          
-          return {
-            date: new Date(Number(tx.timestamp) * 1000).toLocaleString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-            }),
-            amount: `${amountInEth} ${tokenName}`,
-            recipients: '1', //this should be added to the contract return value
-            status: 'completed' as const,
-            txHash: tx.tx_hash,
-            type: transactionType,
-            token: tokenName
-          };
-        }).slice(0, 10);
-      } catch (error) {
-        console.log('Error fetching transaction history:', error);
-      }
+      // No recent disbursements function available - return empty array
+      setDisbursements([]);
 
       setMetrics({
         totalVaultBalance: `${balanceInEth} ETH`,
         nextPayoutDate,
         activeMembers
       });
-
-      setDisbursements(disbursementHistory);
     } catch (error) {
-      console.error('Error fetching dashboard metrics:', error);
-      setError('Failed to fetch dashboard metrics');
-      setMetrics({
-        totalVaultBalance: 'NaN',
-        nextPayoutDate: 'NaN',
-        activeMembers: 'NaN'
-      });
+      console.error('Error fetching metrics:', error);
+      setError('Failed to fetch metrics');
     } finally {
       setIsLoading(false);
     }

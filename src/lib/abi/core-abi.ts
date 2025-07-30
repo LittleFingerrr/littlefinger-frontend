@@ -523,7 +523,7 @@ export const COREABI = [
   },
   {
     "type": "struct",
-    "name": "littlefinger::structs::disbursement_structs::DisbursementSchedule",
+    "name": "littlefinger::structs::disbursement_structs::Disbursement",
     "members": [
       {
         "name": "schedule_id",
@@ -603,7 +603,7 @@ export const COREABI = [
         "inputs": [],
         "outputs": [
           {
-            "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+            "type": "littlefinger::structs::disbursement_structs::Disbursement"
           }
         ],
         "state_mutability": "view"
@@ -614,7 +614,7 @@ export const COREABI = [
         "inputs": [],
         "outputs": [
           {
-            "type": "core::array::Array::<littlefinger::structs::disbursement_structs::DisbursementSchedule>"
+            "type": "core::array::Array::<littlefinger::structs::disbursement_structs::Disbursement>"
           }
         ],
         "state_mutability": "view"
@@ -980,7 +980,7 @@ export const COREABI = [
   },
   {
     "type": "struct",
-    "name": "littlefinger::structs::dao_controller::SETCURRENTDISBURSEMENTSCHEDULE",
+    "name": "littlefinger::structs::dao_controller::SETCURRENTDisbursement",
     "members": [
       {
         "name": "schedule_id",
@@ -988,11 +988,11 @@ export const COREABI = [
       },
       {
         "name": "previous_schedule",
-        "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+        "type": "littlefinger::structs::disbursement_structs::Disbursement"
       },
       {
         "name": "new_schedule",
-        "type": "littlefinger::structs::disbursement_structs::DisbursementSchedule"
+        "type": "littlefinger::structs::disbursement_structs::Disbursement"
       }
     ]
   },
@@ -1045,8 +1045,8 @@ export const COREABI = [
         "type": "littlefinger::structs::dao_controller::CHANGEMEMBERSTATUS"
       },
       {
-        "name": "SETCURRENTDISBURSEMENTSCHEDULE",
-        "type": "littlefinger::structs::dao_controller::SETCURRENTDISBURSEMENTSCHEDULE"
+        "name": "SETCURRENTDisbursement",
+        "type": "littlefinger::structs::dao_controller::SETCURRENTDisbursement"
       },
       {
         "name": "CHANGESCHEDULESTATUS",
