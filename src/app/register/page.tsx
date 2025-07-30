@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { useAccount, useContract } from "@starknet-react/core";
+import { useAccount, useContract, useSendTransaction } from "@starknet-react/core";
 import { useRouter } from "next/navigation";
 import logo from "../../../public/logo.svg";
 import backgroundImage from "../../../public/registerBackgroundImg.png";
@@ -11,6 +11,10 @@ import { DynamicSocialContacts, SocialContact } from "@/components/ui/dynamic-so
 import { pinataService, OrganizationMetadata } from "@/lib/pinata";
 import { FACTORYABI } from "@/lib/abi/factory-abi";
 import { LITTLEFINGER_FACTORY_ADDRESS, STARKGATE_STRK_ADDRESS } from "@/lib/constants";
+import { ConnectWallet } from "@/components/connect-wallet";
+import { Card, CardContent } from "@/components/ui/card";
+import { Wallet } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface FormData {
   // Basic Organization Info
@@ -25,7 +29,6 @@ interface FormData {
   first_admin_fname: string;
   first_admin_lname: string;
   first_admin_alias: string;
-  adminWallet: string;
 
   // Contract Info
   token: string;
@@ -45,16 +48,15 @@ const STEPS = [
 
 const TOKEN_OPTIONS = [
   { value: STARKGATE_STRK_ADDRESS, label: "STRK" },
-  { value: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7", label: "ETH" },
-  { value: "0x00da114221cb83fa859dbdb4c44beeaa0bb37c7537ad5ae66fe5e0efd20e6eb3", label: "DAI" },
-  { value: "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8", label: "USDT" },
-  { value: "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8", label: "USDC" },
+  { value: "0x028757d11c97078Dd182023B1cC7b9E7659716c631ADF94D24f1fa7Dc5943072", label: "USDC" },
 ];
 
 const Register = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ipfsUrl, setIpfsUrl] = useState("");
   const router = useRouter();
+  const { toast } = useToast();
 
   const { address: userAddress, isConnected } = useAccount();
   const { contract: factoryContract } = useContract({
@@ -72,9 +74,21 @@ const Register = () => {
     first_admin_fname: "",
     first_admin_lname: "",
     first_admin_alias: "",
-    adminWallet: userAddress || "",
     token: "",
     organization_type: 1,
+  });
+
+  const salt = Math.floor(Math.random() * 1000000).toString();
+
+  const calls = useMemo(() => {
+
+    if (!userAddress || !factoryContract || !ipfsUrl) return undefined;
+    return [factoryContract.populateTransaction['setup_org'](formData.token, salt, userAddress, formData.organization, ipfsUrl, formData.first_admin_fname, formData.first_admin_lname, formData.first_admin_alias, formData.organization_type)];
+
+  }, [factoryContract, userAddress, ipfsUrl]);
+
+  const { sendAsync, isSuccess, error, } = useSendTransaction({
+    calls
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -141,7 +155,7 @@ const Register = () => {
         if (!formData.first_admin_fname.trim()) newErrors.first_admin_fname = "First name is required";
         if (!formData.first_admin_lname.trim()) newErrors.first_admin_lname = "Last name is required";
         if (!formData.first_admin_alias.trim()) newErrors.first_admin_alias = "Admin alias is required";
-        if (!formData.adminWallet.trim()) newErrors.adminWallet = "Admin wallet address is required";
+        if (!userAddress) newErrors.adminWallet = "Admin wallet address is required";
         break;
 
       case 4:
@@ -167,7 +181,7 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateStep(currentStep) || !isConnected || !userAddress || !factoryContract) {
+    if (!validateStep(currentStep) || !isConnected || !userAddress || !factoryContract || !userAddress) {
       if (!isConnected) {
         alert("Please connect your wallet first");
       }
@@ -188,7 +202,7 @@ const Register = () => {
         adminFirstName: formData.first_admin_fname,
         adminLastName: formData.first_admin_lname,
         adminAlias: formData.first_admin_alias,
-        adminWallet: formData.adminWallet,
+        adminWallet: userAddress,
         token: formData.token,
         organizationType: formData.organization_type,
         createdAt: new Date().toISOString(),
@@ -197,33 +211,40 @@ const Register = () => {
 
       // 2. Upload to Pinata
       console.log("Uploading metadata to IPFS...");
-      const ipfsUrl = await pinataService.uploadMetadata(metadata);
-      console.log("IPFS URL:", ipfsUrl);
+      const uploadedIpfsUrl = await pinataService.uploadMetadata(metadata);
+      setIpfsUrl(uploadedIpfsUrl);
+      console.log("IPFS URL:", uploadedIpfsUrl);
 
       // 3. Deploy contract
       console.log("Deploying organization contract...");
-      const salt = Math.floor(Math.random() * 1000000).toString();
 
-      const result = await factoryContract.setup_org(
-        formData.token,
-        salt,
-        userAddress,
-        formData.organization,
-        ipfsUrl,
-        formData.first_admin_fname,
-        formData.first_admin_lname,
-        formData.first_admin_alias,
-        formData.organization_type
-      );
+      await sendAsync();
 
-      console.log("Organization deployed successfully:", result);
+      if (isSuccess) {
+        console.log("Organization deployed successfully");
+        toast({
+          title: "Organization created successfully",
+          description: "You can now access your organization dashboard",
+        });
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+        // Redirect to dashboard
+        router.push("/dashboard");
+      } else {
+        console.log("Organization deployment failed:", error);
+        toast({
+          title: "Failed to create organization",
+          description: "Please try again" + error,
+          variant: "destructive",
+        });
+      }
 
     } catch (error) {
       console.error("Error creating organization:", error);
-      alert("Failed to create organization. Please try again.");
+      toast({
+        title: "Failed to create organization",
+        description: "Please try again",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -355,13 +376,12 @@ const Register = () => {
                 <input
                   name="adminWallet"
                   placeholder="Admin Wallet Address"
-                  value={formData.adminWallet}
-                  onChange={(e) => handleInputChange("adminWallet", e.target.value)}
+                  value={userAddress}
+                  disabled
                   className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
                 />
                 <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
               </div>
-              {errors.adminWallet && <p className="text-red-500 text-sm mt-1">{errors.adminWallet}</p>}
             </div>
           </div>
         );
@@ -414,95 +434,119 @@ const Register = () => {
     }
   };
 
+
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#070602] overflow-hidden">
       <Image
         src={backgroundImage}
         alt="background"
-        layout="fill"
         objectFit="cover"
         className="absolute"
       />
-
       <div
         className="relative z-10 p-10 rounded-2xl w-full max-w-2xl shadow-lg"
         style={{
           background: `linear-gradient(to left, #FF9B28 0%, #8B4513 0%, #070602 50%, #070602 100%)`,
         }}
       >
-        <div className="flex justify-center mb-6">
-          <Image src={logo} alt="Logo" width={100} height={100} />
-        </div>
+        {!isConnected || !userAddress ? (
+          <div className="flex items-center justify-center min-h-[400px] p-6">
+            <Card className="max-w-md w-full bg-[#131313A6] border-[#967623] rounded-3xl">
+              <CardContent className="p-8 flex flex-col items-center justify-center">
+                <div className="flex justify-center mb-4">
+                  <Wallet className="w-16 h-16  text-[#967623]" />
+                </div>
 
-        <h2 className="text-2xl font-semibold text-center text-white sm:text-4xl sm:font-bold mb-3">
-          Register Organization
-        </h2>
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  Connect Your Wallet
+                </h3>
 
-        <p className="text-lg text-center text-white mb-8">
-          Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1]?.title}
-        </p>
+                <p className="text-gray-400 mb-6">
+                  Please connect your wallet to register a organization
+                </p>
 
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            {STEPS.map((step) => (
-              <div
-                key={step.id}
-                className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step.id <= currentStep
-                  ? "bg-[#FF9B28] text-white"
-                  : "bg-gray-600 text-gray-300"
-                  }`}
-              >
-                {step.id}
+                <ConnectWallet />
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-center mb-6">
+              <Image src={logo} alt="Logo" width={100} height={100} />
+            </div>
+
+            <h2 className="text-2xl font-semibold text-center text-white sm:text-4xl sm:font-bold mb-3">
+              Register Organization
+            </h2>
+
+            <p className="text-lg text-center text-white mb-8">
+              Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1]?.title}
+            </p>
+
+            {/* Progress Bar */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-2">
+                {STEPS.map((step) => (
+                  <div
+                    key={step.id}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${step.id <= currentStep
+                      ? "bg-[#FF9B28] text-white"
+                      : "bg-gray-600 text-gray-300"
+                      }`}
+                  >
+                    {step.id}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="w-full bg-gray-600 rounded-full h-2">
-            <div
-              className="bg-[#FF9B28] h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
-            ></div>
-          </div>
-        </div>
+              <div className="w-full bg-gray-600 rounded-full h-2">
+                <div
+                  className="bg-[#FF9B28] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
 
-        <form onSubmit={handleSubmit}>
-          {renderStepContent()}
+            <form onSubmit={handleSubmit}>
+              {renderStepContent()}
 
-          <div className="flex justify-between mt-8">
-            <button
-              type="button"
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className={`px-6 py-3 rounded-lg font-medium ${currentStep === 1
-                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-gray-700 text-white hover:bg-gray-600"
-                } transition-colors`}
-            >
-              Previous
-            </button>
+              <div className="flex justify-between mt-8">
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  className={`px-6 py-3 rounded-full font-medium ${currentStep === 1
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-700 text-white hover:bg-gray-600"
+                    } transition-colors`}
+                >
+                  Previous
+                </button>
 
-            {currentStep < STEPS.length ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-600 text-white font-medium hover:opacity-90 transition-opacity"
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={isSubmitting || !isConnected}
-                className={`px-6 py-3 rounded-lg font-medium transition-opacity ${isSubmitting || !isConnected
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-yellow-600 to-yellow-600 text-white hover:opacity-90"
-                  }`}
-              >
-                {isSubmitting ? "Creating..." : "Create Organization"}
-              </button>
-            )}
-          </div>
-        </form>
+                {currentStep < STEPS.length ? (
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="px-6 py-3 rounded-full bg-gradient-to-r from-yellow-600 to-yellow-600 text-white font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !isConnected}
+                    className={`px-6 py-3 rounded-full font-medium transition-opacity ${isSubmitting || !isConnected
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-yellow-600 to-yellow-600 text-white hover:opacity-90"
+                      }`}
+                  >
+                    {isSubmitting ? "Creating..." : "Create Organization"}
+                  </button>
+                )}
+              </div>
+            </form>
+
+          </>
+        )}
       </div>
     </div>
   );

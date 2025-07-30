@@ -23,7 +23,7 @@ export interface OrganizationMetadata {
   adminFirstName: string
   adminLastName: string
   adminAlias: string
-  adminWallet: string
+  adminWallet: `0x${string}`
   token: string
   organizationType: number
   createdAt: string
