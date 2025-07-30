@@ -78,7 +78,7 @@ export function useDashboardMetrics() {
       setDisbursements([]);
 
       setMetrics({
-        totalVaultBalance: `${balanceInEth} ETH`,
+        totalVaultBalance: `${balanceInEth} STRK`,
         nextPayoutDate,
         activeMembers
       });
