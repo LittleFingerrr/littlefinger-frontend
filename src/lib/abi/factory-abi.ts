@@ -68,14 +68,6 @@ export const FACTORYABI = [
         "name": "setup_org",
         "inputs": [
           {
-            "name": "available_funds",
-            "type": "core::integer::u256"
-          },
-          {
-            "name": "starting_bonus_allocation",
-            "type": "core::integer::u256"
-          },
-          {
             "name": "token",
             "type": "core::starknet::contract_address::ContractAddress"
           },
@@ -106,6 +98,10 @@ export const FACTORYABI = [
           {
             "name": "first_admin_alias",
             "type": "core::felt252"
+          },
+          {
+            "name": "organization_type",
+            "type": "core::integer::u8"
           }
         ],
         "outputs": [

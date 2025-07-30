@@ -29,18 +29,18 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
               <AlertCircle className="w-16 h-16 text-[#967623]" />
             )}
           </div>
-          
+
           <h3 className="text-xl font-semibold text-white mb-2">
             {!isWalletConnected ? 'Connect Your Wallet' : 'Organization Not Found'}
           </h3>
-          
+
           <p className="text-gray-400 mb-6">
-            {!isWalletConnected 
+            {!isWalletConnected
               ? 'Please connect your wallet to access your organization dashboard.'
               : `${message}. Make sure your connected address has access to an organization.`
             }
           </p>
-          
+
           <div className="space-y-3">
             {/* Primary action button */}
             {!isWalletConnected && onConnectWallet ? (
