@@ -1,5 +1,5 @@
 import React from 'react';
-import { Disbursement } from '@/lib/mockData';
+import { Disbursement } from '@/hooks/useDashboardMetrics';
 
 interface DisbursementsTableProps {
   disbursements: Disbursement[];
@@ -21,9 +21,10 @@ export default function DisbursementsTable({ disbursements }: DisbursementsTable
         
         {/* Fixed Header */}
         <div className="px-6 py-3 overflow-x-auto">
-          <div className="min-w-[800px]">
-            <div className="grid grid-cols-5 gap-4 text-xs font-medium text-white uppercase tracking-wider">
+          <div className="min-w-[900px]">
+            <div className="grid grid-cols-6 gap-4 text-xs font-medium text-white uppercase tracking-wider">
               <div>Date</div>
+              <div>Type</div>
               <div>Amount</div>
               <div>Recipients</div>
               <div>Status</div>
@@ -35,27 +36,37 @@ export default function DisbursementsTable({ disbursements }: DisbursementsTable
         {/* Scrollable Data */}
         <div className="overflow-y-auto table-scroll" style={{ maxHeight: 'calc(100vh - 405px)' }}>
           <div className="px-6 overflow-x-auto">
-            <div className="min-w-[800px]">
-              {disbursements.map((disbursement, index) => (
-                <div key={index} className="grid grid-cols-5 gap-4 py-4">
-                  <div className="text-sm text-white">{disbursement.date}</div>
-                  <div className="text-sm text-white">{disbursement.amount}</div>
-                  <div className="text-sm text-white">{disbursement.recipients}</div>
-                  <div>
-                    <span 
-                      className="inline-flex px-3 py-1 text-xs font-medium rounded-full text-white"
-                      style={{ backgroundColor: '#6B4F3B' }}
-                    >
-                      {disbursement.status}
-                    </span>
+            <div className="min-w-[900px]">
+              {disbursements.length > 0 ? (
+                disbursements.map((disbursement, index) => (
+                  <div key={index} className="grid grid-cols-6 gap-4 py-4">
+                    <div className="text-sm text-white">{disbursement.date}</div>
+                    <div className={`text-sm font-medium ${disbursement.type}`}>
+                      {disbursement.type}
+                    </div>
+                    <div className="text-sm text-white">{disbursement.amount}</div>
+                    <div className="text-sm text-white">{disbursement.recipients}</div>
+                    <div>
+                      <span 
+                        className="inline-flex px-3 py-1 text-xs font-medium rounded-full text-white"
+                        style={{ backgroundColor: '#6B4F3B' }}
+                      >
+                        {disbursement.status}
+                      </span>
+                    </div>
+                    <div>
+                      <button className="text-sm flex items-center gap-2 text-white hover:text-gray-300 transition-colors">
+                        View Details
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <button className="text-sm text-white hover:text-gray-300 transition-colors">
-                      View Details
-                    </button>
-                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center">
+                  <div className="text-gray-400 text-sm">No disbursements found</div>
+                  <div className="text-gray-500 text-xs mt-1">Recent disbursement will appear here</div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
