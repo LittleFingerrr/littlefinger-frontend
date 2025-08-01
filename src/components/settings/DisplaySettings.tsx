@@ -9,6 +9,7 @@ export default function DisplaySettings() {
       <div className="mt-4">
         <h3 className="text-md font-medium mb-1">Dark Mode</h3>
         <p className="text-gray-400">Customize your dashboard appearance</p>
+        <p className="text-gray-300">Birdmannn</p>
       </div>
     </div>
   );
