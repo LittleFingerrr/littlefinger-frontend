@@ -1,13 +1,13 @@
-import MembersCTABtns from './MembersCTABtns'
-import MembersList from './MembersList'
+import MembersCTABtns from './MembersCTABtns';
+import MembersList from './MembersList';
 
 const MembersContent = () => {
-  return (
-    <>
-    <MembersCTABtns />
-    <MembersList />
-    </>
-  )
-}
+    return (
+        <>
+            <MembersCTABtns />
+            <MembersList />
+        </>
+    );
+};
 
-export default MembersContent
+export default MembersContent;
