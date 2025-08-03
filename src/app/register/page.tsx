@@ -15,6 +15,7 @@ import { ConnectWallet } from "@/components/connect-wallet";
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { contractAddressToHex } from "@/lib/utils";
 
 interface FormData {
   // Basic Organization Info
@@ -80,15 +81,8 @@ const Register = () => {
 
   const salt = Math.floor(Math.random() * 1000000).toString();
 
-  const calls = useMemo(() => {
-
-    if (!userAddress || !factoryContract || !ipfsUrl) return undefined;
-    return [factoryContract.populateTransaction['setup_org'](formData.token, salt, userAddress, formData.organization, ipfsUrl, formData.first_admin_fname, formData.first_admin_lname, formData.first_admin_alias, formData.organization_type)];
-
-  }, [factoryContract, userAddress, ipfsUrl]);
-
-  const { sendAsync, isSuccess, error, } = useSendTransaction({
-    calls
+  const { sendAsync } = useSendTransaction({
+    calls: undefined // We'll construct calls dynamically during submission
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -218,31 +212,38 @@ const Register = () => {
       // 3. Deploy contract
       console.log("Deploying organization contract...");
 
-      await sendAsync();
+      // Construct the calls with the IPFS URL
+      const contractCalls = [
+        factoryContract.populateTransaction['setup_org'](
+          contractAddressToHex(formData.token),
+          salt,
+          contractAddressToHex(userAddress),
+          formData.organization,
+          uploadedIpfsUrl,
+          formData.first_admin_fname,
+          formData.first_admin_lname,
+          formData.first_admin_alias,
+          formData.organization_type
+        )
+      ];
 
-      if (isSuccess) {
-        console.log("Organization deployed successfully");
-        toast({
-          title: "Organization created successfully",
-          description: "You can now access your organization dashboard",
-        });
+      // Send the transaction and handle the result
+      const result = await sendAsync(contractCalls);
 
-        // Redirect to dashboard
-        router.push("/dashboard");
-      } else {
-        console.log("Organization deployment failed:", error);
-        toast({
-          title: "Failed to create organization",
-          description: "Please try again" + error,
-          variant: "destructive",
-        });
-      }
+      console.log("Organization deployed successfully");
+      toast({
+        title: "Organization created successfully",
+        description: "You can now access your organization dashboard",
+      });
+
+      // Redirect to dashboard
+      router.push("/dashboard");
 
     } catch (error) {
       console.error("Error creating organization:", error);
       toast({
         title: "Failed to create organization",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       });
     } finally {
