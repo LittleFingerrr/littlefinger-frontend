@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -31,6 +31,7 @@ export default function VaultPage() {
     const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
     const [isFreezeOpen, setIsFreezeOpen] = useState(false);
     const [isPaying, setIsPaying] = useState(false);
+    const [status, setStatus] = useState('');
 
     const { address: user } = useAccount();
 
@@ -82,9 +83,6 @@ export default function VaultPage() {
             : ({} as any)
     );
 
-    //   console.log(members)
-    console.log('addy', ContractAddresses);
-
     const { data: transactionHistory, isLoading: transactionHistoryLoading } = useReadContract({
         abi: VAULTABI,
         address: contractAddressToHex(ContractAddresses?.[1]),
@@ -93,37 +91,9 @@ export default function VaultPage() {
         watch: true,
     });
 
-    // Mock data for vault
-    // const vaultStatus = 'Active and Operational';
-    // const transactions = [
-    //     {
-    //         id: 1,
-    //         type: 'Deposit',
-    //         amount: '+$50,000.00',
-    //         status: 'Success',
-    //         date: 'May 31, 2024',
-    //     },
-    //     {
-    //         id: 2,
-    //         type: 'Withdrawal',
-    //         amount: '-$10,000.00',
-    //         status: 'Success',
-    //         date: 'May 31, 2024',
-    //     },
-    //     {
-    //         id: 3,
-    //         type: 'Payout',
-    //         amount: '-$18,000.00',
-    //         status: 'Success',
-    //         date: 'Apr 31, 2024',
-    //     },
-    // ];
-
     const parsedTxHistory = transactionHistory?.map((tx, index) => {
         const type = tx.transaction_type.activeVariant();
-        console.log(type);
         const amount = Number(tx.amount) / 1e18;
-        console.log(amount);
         const token = felt252ToString(tx.token);
         const date = new Date(Number(tx.timestamp) * 1000).toDateString();
 
@@ -135,8 +105,6 @@ export default function VaultPage() {
             date,
         };
     });
-
-    const finalStatus = (contractVaultStatus as any as CairoCustomEnum)?.activeVariant();
 
     const { contract } = useContract({
         abi: COREABI,
@@ -151,11 +119,10 @@ export default function VaultPage() {
 
     const { sendAsync: sendPayment } = useSendTransaction({ calls: paymentCall });
 
-    const handlePayment = async () => {
+    const handlePayout = async () => {
         setIsPaying(true);
 
         try {
-            console.log('Sending Payment');
             await sendPayment();
         } catch (err) {
             console.log(err);
@@ -171,6 +138,11 @@ export default function VaultPage() {
         const balanceInEth = Number(balance) / 1e18;
         return balanceInEth.toFixed(2);
     };
+
+    useEffect(() => {
+        console.log('here', contractVaultStatus);
+        setStatus((contractVaultStatus as any as CairoCustomEnum)?.activeVariant());
+    }, [user, contractVaultStatus, vaultStatusIsLoading, isFreezeOpen, setIsFreezeOpen]);
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -232,7 +204,7 @@ export default function VaultPage() {
                                     <Image src={icon2} alt="icon2" className=" text-white" />
                                 </div>
                                 <span className="text-2xl font-bold text-white tracking-tight">
-                                    {finalStatus}
+                                    {status}
                                 </span>
                             </div>
                         </CardContent>
@@ -244,12 +216,14 @@ export default function VaultPage() {
                     <Button
                         className="bg-[#9C7924] hover:bg-yellow-700 text-black font-medium px-10 py-6 rounded-full"
                         onClick={() => setIsDepositOpen(true)}
+                        disabled={status == 'VAULTFROZEN'}
                     >
                         Deposit Funds
                     </Button>
                     <Button
                         className="bg-[#5EF25021] hover:bg-green-700 text-[#45FF01] font-medium px-10 py-6 rounded-full"
                         onClick={() => setIsWithdrawOpen(true)}
+                        disabled={status == 'VAULTFROZEN'}
                     >
                         Withdraw Funds
                     </Button>
@@ -257,12 +231,12 @@ export default function VaultPage() {
                         className="bg-[#FF828421] hover:bg-red-900 text-[#FF8284] font-medium px-10 py-6 rounded-full"
                         onClick={() => setIsFreezeOpen(true)}
                     >
-                        {finalStatus == 'VAULTRESUMED' ? 'Freeze' : 'Unfreeze'}
+                        {status == 'VAULTRESUMED' ? 'Freeze' : 'Unfreeze'}
                     </Button>
                     <Button
                         className="bg-[#FFFFFF21] hover:bg-gray-600 text-white font-medium px-10 py-6 rounded-full"
-                        onClick={() => {}}
-                        disabled={false}
+                        onClick={handlePayout}
+                        disabled={isPaying || status == 'VAULTFROZEN'}
                     >
                         Payout
                     </Button>
@@ -392,11 +366,7 @@ export default function VaultPage() {
             {/* All Modals */}
             <DepositModal open={isDepositOpen} onOpenChange={setIsDepositOpen} />
             <WithdrawModal open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen} />
-            <FreezeModal
-                open={isFreezeOpen}
-                onOpenChange={setIsFreezeOpen}
-                vaultStatus={finalStatus}
-            />
+            <FreezeModal open={isFreezeOpen} onOpenChange={setIsFreezeOpen} vaultStatus={status} />
         </div>
     );
 }
