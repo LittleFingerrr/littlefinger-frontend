@@ -76,7 +76,7 @@ const Register = () => {
     first_admin_lname: "",
     first_admin_alias: "",
     token: "",
-    organization_type: 1,
+    organization_type: 0,
   });
 
   const salt = Math.floor(Math.random() * 1000000).toString();
@@ -154,7 +154,6 @@ const Register = () => {
 
       case 4:
         if (!formData.token) newErrors.token = "Please select a token";
-        if (!formData.organization_type || formData.organization_type < 1) newErrors.organization_type = "Organization type is required";
         break;
     }
 
@@ -412,20 +411,6 @@ const Register = () => {
                 </div>
               </div>
               {errors.token && <p className="text-red-500 text-sm mt-1">{errors.token}</p>}
-            </div>
-
-            <div>
-              <div className="relative group">
-                <input
-                  name="organization_type"
-                  placeholder="Organization Type"
-                  value={formData.organization_type}
-                  onChange={(e) => handleInputChange("organization_type", parseInt(e.target.value) || 0)}
-                  className="w-full bg-[#FFFFFF1A] opacity-50 border border-white text-white p-3 rounded-lg outline-none h-[64px] focus:bg-[#333333] transition-colors"
-                />
-                <div className="absolute bottom-3 left-3 right-3 h-0.5 bg-gray-600 group-focus-within:bg-[#FF9B28] transition-colors"></div>
-              </div>
-              {errors.organization_type && <p className="text-red-500 text-sm mt-1">{errors.organization_type}</p>}
             </div>
           </div>
         );
