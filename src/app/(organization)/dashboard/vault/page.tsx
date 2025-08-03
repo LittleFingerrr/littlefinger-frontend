@@ -257,7 +257,7 @@ export default function VaultPage() {
                         className="bg-[#FF828421] hover:bg-red-900 text-[#FF8284] font-medium px-10 py-6 rounded-full"
                         onClick={() => setIsFreezeOpen(true)}
                     >
-                        Unfreeze
+                        {finalStatus == 'VAULTRESUMED' ? 'Freeze' : 'Unfreeze'}
                     </Button>
                     <Button
                         className="bg-[#FFFFFF21] hover:bg-gray-600 text-white font-medium px-10 py-6 rounded-full"
@@ -392,7 +392,11 @@ export default function VaultPage() {
             {/* All Modals */}
             <DepositModal open={isDepositOpen} onOpenChange={setIsDepositOpen} />
             <WithdrawModal open={isWithdrawOpen} onOpenChange={setIsWithdrawOpen} />
-            <FreezeModal open={isFreezeOpen} onOpenChange={setIsFreezeOpen} />
+            <FreezeModal
+                open={isFreezeOpen}
+                onOpenChange={setIsFreezeOpen}
+                vaultStatus={finalStatus}
+            />
         </div>
     );
 }
