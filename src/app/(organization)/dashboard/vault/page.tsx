@@ -140,7 +140,6 @@ export default function VaultPage() {
     };
 
     useEffect(() => {
-        console.log('here', contractVaultStatus);
         setStatus((contractVaultStatus as any as CairoCustomEnum)?.activeVariant());
     }, [user, contractVaultStatus, vaultStatusIsLoading, isFreezeOpen, setIsFreezeOpen]);
 
