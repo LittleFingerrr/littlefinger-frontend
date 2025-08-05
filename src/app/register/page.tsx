@@ -215,6 +215,7 @@ const Register = () => {
       // Construct the calls with the IPFS URL
       const contractCalls = [
         factoryContract.populateTransaction['setup_org'](
+          0, 0,
           contractAddressToHex(formData.token),
           salt,
           contractAddressToHex(userAddress),
