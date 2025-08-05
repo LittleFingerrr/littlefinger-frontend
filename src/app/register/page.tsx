@@ -6,7 +6,7 @@ import { useAccount, useContract, useSendTransaction } from "@starknet-react/cor
 import { useRouter } from "next/navigation";
 import logo from "../../../public/logo.svg";
 import backgroundImage from "../../../public/registerBackgroundImg.png";
-import { URLInputWithPreview } from "@/components/ui/url-input-with-preview";
+import { FileUploadWithPreview } from "@/components/ui/file-upload-with-preview";
 import { DynamicSocialContacts, SocialContact } from "@/components/ui/dynamic-social-contacts";
 import { pinataService, OrganizationMetadata } from "@/lib/pinata";
 import { FACTORYABI } from "@/lib/abi/factory-abi";
@@ -24,7 +24,9 @@ interface FormData {
   website: string;
   socialContacts: SocialContact[];
   logoUri: string;
+  logoFileName: string;
   legalDocument: string;
+  legalDocumentFileName: string;
 
   // Admin Info
   first_admin_fname: string;
@@ -71,7 +73,9 @@ const Register = () => {
     website: "",
     socialContacts: [],
     logoUri: "",
+    logoFileName: "",
     legalDocument: "",
+    legalDocumentFileName: "",
     first_admin_fname: "",
     first_admin_lname: "",
     first_admin_alias: "",
@@ -134,15 +138,12 @@ const Register = () => {
           }
         }
 
-        // Validate optional logo URI if provided
-        if (formData.logoUri && formData.logoUri.trim() !== "" && !isValidUrl(formData.logoUri)) {
-          newErrors.logoUri = "Please enter a valid logo URL";
+        // Logo is now mandatory
+        if (!formData.logoUri.trim()) {
+          newErrors.logoUri = "Organization logo is required";
         }
 
-        // Validate optional legal document URL if provided
-        if (formData.legalDocument && formData.legalDocument.trim() !== "" && !isValidUrl(formData.legalDocument)) {
-          newErrors.legalDocument = "Please enter a valid legal document URL";
-        }
+        // Legal document is optional - no validation needed
         break;
 
       case 3:
@@ -305,22 +306,28 @@ const Register = () => {
               error={errors.socialContacts}
             />
 
-            <URLInputWithPreview
+            <FileUploadWithPreview
               id="logoUri"
-              label="Logo"
-              placeholder="Logo URL (Optional)"
+              label="Organization Logo"
               value={formData.logoUri}
-              onChange={(value) => handleInputChange("logoUri", value)}
+              onChange={(uri, fileName) => {
+                handleInputChange("logoUri", uri);
+                handleInputChange("logoFileName", fileName);
+              }}
               error={errors.logoUri}
+              required={true}
             />
 
-            <URLInputWithPreview
+            <FileUploadWithPreview
               id="legalDocument"
               label="Legal Document"
-              placeholder="Legal Document URL (Optional)"
               value={formData.legalDocument}
-              onChange={(value) => handleInputChange("legalDocument", value)}
+              onChange={(uri, fileName) => {
+                handleInputChange("legalDocument", uri);
+                handleInputChange("legalDocumentFileName", fileName);
+              }}
               error={errors.legalDocument}
+              required={false}
             />
 
           </div>
