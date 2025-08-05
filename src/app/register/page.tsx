@@ -58,6 +58,7 @@ const Register = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ipfsUrl, setIpfsUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -317,6 +318,8 @@ const Register = () => {
               }}
               error={errors.logoUri}
               required={true}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
             />
 
             <FileUploadWithPreview
@@ -329,6 +332,8 @@ const Register = () => {
               }}
               error={errors.legalDocument}
               required={false}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
             />
 
           </div>
@@ -507,7 +512,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={prevStep}
-                  disabled={currentStep === 1}
+                  disabled={currentStep === 1 || isUploading}
                   className={`px-6 py-3 rounded-full font-medium ${currentStep === 1
                     ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                     : "bg-gray-700 text-white hover:bg-gray-600"
@@ -527,8 +532,8 @@ const Register = () => {
                 ) : (
                   <button
                     type="submit"
-                    disabled={isSubmitting || !isConnected}
-                    className={`px-6 py-3 rounded-full font-medium transition-opacity ${isSubmitting || !isConnected
+                    disabled={isSubmitting || !isConnected || isUploading}
+                    className={`px-6 py-3 rounded-full font-medium transition-opacity ${isSubmitting || !isConnected || isUploading
                       ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                       : "bg-gradient-to-r from-yellow-600 to-yellow-600 text-white hover:opacity-90"
                       }`}

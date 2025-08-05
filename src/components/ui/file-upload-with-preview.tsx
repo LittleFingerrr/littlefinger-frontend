@@ -11,6 +11,8 @@ interface FileUploadWithPreviewProps {
   error?: string;
   required?: boolean;
   accept?: string;
+  isUploading?: boolean;
+  setIsUploading?: (isUploading: boolean) => void;
 }
 
 interface UploadState {
@@ -30,6 +32,8 @@ export const FileUploadWithPreview: React.FC<FileUploadWithPreviewProps> = ({
   error,
   required = false,
   accept = "image/jpeg,image/png,image/jpg",
+  isUploading = false,
+  setIsUploading = () => { },
 }) => {
   const [uploadState, setUploadState] = useState<UploadState>({
     uploading: false,
@@ -86,6 +90,7 @@ export const FileUploadWithPreview: React.FC<FileUploadWithPreviewProps> = ({
       progress: 0,
     }));
 
+    setIsUploading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -132,8 +137,10 @@ export const FileUploadWithPreview: React.FC<FileUploadWithPreviewProps> = ({
         fileName: null,
         previewUrl: null,
       });
+    } finally {
+      setIsUploading(false);
     }
-  }, [validateFile, onChange]);
+  }, [validateFile, onChange, setIsUploading]);
 
   const handleFileSelect = useCallback((files: FileList | null) => {
     if (!files || files.length === 0) return;
