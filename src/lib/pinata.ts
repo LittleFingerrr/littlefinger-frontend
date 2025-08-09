@@ -1,86 +1,87 @@
 "use client"
 
+import { PinataSDK } from "pinata"
+
 export interface PinataConfig {
   apiKey: string
   apiSecret: string
   jwt: string
 }
 
+export interface SocialContact {
+  platform: string
+  handle: string
+}
+
 export interface OrganizationMetadata {
   name: string
   description: string
-  email: string
-  adminName: string
+  website?: string
+  socialContacts: SocialContact[]
+  logoUri?: string
+  legalDocument?: string
+  adminFirstName: string
+  adminLastName: string
+  adminAlias: string
+  adminWallet: `0x${string}`
+  token: string
+  organizationType: number
   createdAt: string
   version: "1.0"
 }
 
+// Client-side Pinata SDK instance
+export const pinata = new PinataSDK({
+  pinataJwt: "",
+  pinataGateway: `${process.env.NEXT_PUBLIC_GATEWAY_URL}`
+})
+
 export class PinataService {
-  private config: PinataConfig
-
-  constructor(config: PinataConfig) {
-    this.config = config
-  }
-
   async uploadMetadata(metadata: OrganizationMetadata): Promise<string> {
     try {
-      const response = await fetch("https://api.pinata.cloud/pinning/pinJSONToIPFS", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          pinata_api_key: this.config.apiKey,
-          pinata_secret_api_key: this.config.apiSecret,
-          Authorization: `Bearer ${this.config.jwt}`,
-        },
-        body: JSON.stringify({
-          pinataContent: metadata,
-          pinataMetadata: {
-            name: `${metadata.name}-organization-metadata`,
-            keyvalues: {
-              organization: metadata.name,
-              type: "organization-metadata",
-            },
-          },
-          pinataOptions: {
-            cidVersion: 1,
-          },
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error(`Pinata upload failed: ${response.statusText}`)
+      // 1. Get signed upload URL from our API
+      const urlRequest = await fetch("/api/pinata-url");
+      if (!urlRequest.ok) {
+        throw new Error(`Failed to get signed URL: ${urlRequest.statusText}`);
       }
+      const urlResponse = await urlRequest.json();
 
-      const result = await response.json()
-      return `ipfs://${result.IpfsHash}`
+      // 2. Create JSON file from metadata
+      const jsonData = JSON.stringify(metadata, null, 2);
+      const file = new File([jsonData], "organization.json", { type: "application/json" });
+
+      // 3. Upload using Pinata SDK with signed URL
+      const upload = await pinata.upload.public
+        .file(file)
+        .url(urlResponse.url)
+        .keyvalues({
+          env: "prod",
+          type: "organization-data",
+          orgName: metadata.name,
+          version: "1.0"
+        });
+
+      console.log("Upload successful:", upload);
+
+      // 4. Return IPFS URL
+      return `ipfs://${upload.cid}`;
     } catch (error) {
-      console.error("Error uploading to Pinata:", error)
-      throw error
+      console.error("Error uploading to Pinata:", error);
+      throw error;
     }
   }
 
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch("https://api.pinata.cloud/data/testAuthentication", {
-        method: "GET",
-        headers: {
-          pinata_api_key: this.config.apiKey,
-          pinata_secret_api_key: this.config.apiSecret,
-          Authorization: `Bearer ${this.config.jwt}`,
-        },
-      })
-
-      return response.ok
+      // Test by trying to get a signed URL
+      const response = await fetch("/api/pinata-url");
+      return response.ok;
     } catch (error) {
-      console.error("Pinata connection test failed:", error)
-      return false
+      console.error("Pinata connection test failed:", error);
+      return false;
     }
   }
 }
 
 // Initialize Pinata service
-export const pinataService = new PinataService({
-  apiKey: process.env.NEXT_PUBLIC_PINATA_API_KEY || "",
-  apiSecret: process.env.NEXT_PUBLIC_PINATA_API_SECRET || "",
-  jwt: process.env.NEXT_PUBLIC_PINATA_JWT || "",
-})
+export const pinataService = new PinataService();
