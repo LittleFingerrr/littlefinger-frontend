@@ -23,7 +23,7 @@ import { useAccount, useReadContract } from '@starknet-react/core';
 import { FACTORYABI } from '@/lib/abi/factory-abi';
 import { COREABI } from '@/lib/abi/core-abi';
 import { LITTLEFINGER_FACTORY_ADDRESS } from '@/lib/constants';
-import { contractAddressToHex } from '@/lib/utils';
+import { contractAddressToHex, felt252ToString } from '@/lib/utils';
 import { CairoCustomEnum, uint256 } from 'starknet';
 
 interface FormattedMember {
@@ -61,15 +61,16 @@ const MembersList = () => {
             : ({} as any)
     );
 
-    const members = useMemo((): FormattedMember[] => {
-        const safeMembersFromContract = Array.isArray(members_from_contract)
-            ? members_from_contract
-            : [];
+    const safeMembersFromContract = Array.isArray(members_from_contract)
+        ? members_from_contract
+        : [];
+    
+    const members = useMemo(() => {
+        const safe_members = safeMembersFromContract.map((member, i) => {
 
-        return safeMembersFromContract.map((member, i) => {
-            const firstName = member?.fname || '';
-            const lastName = member?.lname || '';
-            const alias = member?.alias || '';
+            const firstName = felt252ToString(member?.fname) || '';
+            const lastName = felt252ToString(member?.lname) || '';
+            const alias = felt252ToString(member?.alias) || '';
             const id = member?.id ? Number(uint256.uint256ToBN(member.id)) : i;
 
             const role: CairoCustomEnum = member?.role;
@@ -87,24 +88,26 @@ const MembersList = () => {
                 returnedStatus,
             };
         });
-    }, [JSON.stringify(members_from_contract)]);
+        setFilteredMembers(safe_members);
+        return safe_members
+    }, [members_from_contract])
 
     useEffect(() => {
-        const filtered = members.filter(
-            (member) =>
-                member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.alias.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.returnedRole.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredMembers(filtered);
+        const filtered = members.filter((member) => 
+            member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            member.alias.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            member.returnedRole.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        console.log(filtered)
+        setFilteredMembers(filtered)
         setCurrentPage(1);
     }, [searchTerm, members]);
 
     const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
     const startIndex = (currentPage - 1) * membersPerPage;
     const endIndex = startIndex + membersPerPage;
-    const currentMembers = filteredMembers.slice(startIndex, endIndex);
+    const currentMembers = filteredMembers?.slice(startIndex, endIndex);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -158,11 +161,13 @@ const MembersList = () => {
     return (
         <div className="space-y-8 font-inter">
             <div className="flex w-full items-center gap-3">
-                <Input
+                <input
                     className="flex-[2] h-11 rounded-xl bg-transparent border border-white/25 text-white placeholder:text-gray-400 text-base px-4"
                     placeholder="Search Members..."
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => {
+                        setSearchTerm(e.target.value)
+                    }}
                 />
                 <Button
                     className="flex-1 sm:flex-none sm:w-auto rounded-xl bg-white/15 hover:bg-white/20 text-base py-5 px-6 whitespace-nowrap border border-white/25"
@@ -251,8 +256,8 @@ const MembersList = () => {
 
             <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4 pt-4">
                 <p className="font-normal text-base text-gray-300">
-                    Showing {currentMembers.length > 0 ? startIndex + 1 : 0} -{' '}
-                    {Math.min(endIndex, filteredMembers.length)} of {filteredMembers.length} members
+                    Showing {currentMembers.length > 0 ? startIndex + 1 : 1} -{' '}
+                    {Math.min(endIndex, members.length)} of {members.length} members
                 </p>
 
                 {totalPages > 1 && (

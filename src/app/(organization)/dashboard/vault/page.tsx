@@ -294,7 +294,7 @@ export default function VaultPage() {
 
                             <TableBody>
                                 {parsedTxHistory?.map((transaction) => {
-                                    const isPositive = transaction.type.toLowerCase() === 'deposit';
+                                    const isPositive = transaction?.type?.toLowerCase() === 'deposit';
                                     const isNeutral =
                                         transaction.type.toLowerCase() === 'bonus_allocation';
                                     return (
