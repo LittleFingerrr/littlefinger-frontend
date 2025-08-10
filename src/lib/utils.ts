@@ -36,7 +36,7 @@ export function contractAddressToHex(addressValue: any): `0x${string}` {
     } else if (typeof addressValue === 'string') {
         // If it's already a hex string, return as is (with proper formatting)
         if (addressValue.startsWith('0x')) {
-            return addressValue.toLowerCase().padStart(66, '0') as `0x${string}`; // Ensure 64 chars after 0x
+            return addressValue?.toLowerCase().padStart(66, '0') as `0x${string}`; // Ensure 64 chars after 0x
         }
         // If it's a decimal string, convert to BigInt
         bigIntValue = BigInt(addressValue);
