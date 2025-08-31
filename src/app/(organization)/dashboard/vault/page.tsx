@@ -145,9 +145,9 @@ export default function VaultPage() {
 
     return (
         <div className="min-h-screen bg-black text-white">
-            <div className="p-6 space-y-8">
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Card className="bg-[#131313A6] border-none p-4 relative overflow-hidden">
+            <div className="sm:p-6 space-y-8">
+                <div className="grid gap-5 sm:gap-10 md:grid-cols-2">
+                    <Card className="bg-[#131313A6] border-none px-4 sm:py-1 rounded-xl relative overflow-hidden">
                         <div
                             className="absolute bottom-0 right-16 -mb-8 w-60 h-32 
                bg-gradient-to-t from-[#F3A42C4D] to-transparent 
@@ -155,20 +155,24 @@ export default function VaultPage() {
                             style={{ filter: 'blur(32px)' }}
                         />
 
-                        <CardHeader className=" relative z-10">
-                            <CardTitle className="text-xl font-bold text-white">
+                        <CardHeader>
+                            <CardTitle className="text-[16px] sm:text-xl font-semibold text-white">
                                 Total Balance
                             </CardTitle>
                         </CardHeader>
 
-                        <CardContent className="relative z-10 pt-6 ml-12 pb-10">
+                        <CardContent className="mx-12 my-1 sm:my-3">
                             <div className="flex items-center space-x-4">
-                                <div className=" border-2 border-white px-2 py-3 rounded-lg backdrop-blur-sm">
-                                    <Image src={icon1} alt="icon1" className="h-7 w-7 text-white" />
+                                <div className="border-2 border-white px-2 py-3 rounded-xl backdrop-blur-sm">
+                                    <Image
+                                        src={icon1}
+                                        alt="icon1"
+                                        className="h-5 w-5 sm:h-7 sm:w-7 text-white"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col">
-                                    <span className="text-3xl font-bold">
+                                    <span className="text-[24px] sm:text-3xl font-bold">
                                         {vaultBalanceIsLoading
                                             ? 'Loading...'
                                             : `${formatBalance(contractVaultBalance)} STRK`}
@@ -183,7 +187,7 @@ export default function VaultPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-[#131313A6] border-none p-4 relative overflow-hidden">
+                    <Card className="bg-[#131313A6] border-none px-4 py-1 rounded-xl relative overflow-hidden">
                         <div
                             className="absolute bottom-0 right-16 -mb-8 w-60 h-32 
                bg-gradient-to-t from-[#F3A42C4D] to-transparent 
@@ -191,18 +195,22 @@ export default function VaultPage() {
                             style={{ filter: 'blur(32px)' }}
                         />
 
-                        <CardHeader className="pb-4">
-                            <CardTitle className="text-lg font-medium text-white">
+                        <CardHeader>
+                            <CardTitle className="text-[16px] sm:text-xl font-semibold text-white">
                                 Vault Status
                             </CardTitle>
                         </CardHeader>
 
-                        <CardContent className="relative z-10 pt-6 ml-12 pb-10">
+                        <CardContent className="mx-12 my-1 sm:my-3">
                             <div className="flex items-center space-x-4">
                                 <div className="">
-                                    <Image src={icon2} alt="icon2" className=" text-white" />
+                                    <Image
+                                        src={icon2}
+                                        alt="icon2"
+                                        className="h-7 w-7 sm:h-10 sm:w-10 text-white"
+                                    />
                                 </div>
-                                <span className="text-2xl font-bold text-white tracking-tight">
+                                <span className="text-[24px] sm:text-3xl font-bold text-white tracking-tight">
                                     {status}
                                 </span>
                             </div>
@@ -211,7 +219,7 @@ export default function VaultPage() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-4">
+                <div className="sm:flex sm:flex-wrap gap-4 grid grid-cols-2">
                     <Button
                         className="bg-[#9C7924] hover:bg-yellow-700 text-black font-medium px-10 py-6 rounded-full"
                         onClick={() => setIsDepositOpen(true)}
@@ -247,16 +255,16 @@ export default function VaultPage() {
 
                     {/* Filter Buttons */}
                     <div className="flex gap-4">
-                        <Button className="bg-[#FFFFFF21]  hover:bg-gray-600 text-white px-10 py-5 rounded-full">
+                        <Button className="bg-[#FFFFFF21]  hover:bg-gray-600 text-white px-10 py-5 rounded-full w-full sm:w-fit">
                             Filter by type
                         </Button>
-                        <Button className="bg-[#FFFFFF21]  hover:bg-gray-600 text-white px-10 py-5 rounded-full">
+                        <Button className="bg-[#FFFFFF21]  hover:bg-gray-600 text-white px-10 py-5 rounded-full w-full sm:w-fit">
                             Date range
                         </Button>
                     </div>
 
                     {/* Transaction Table */}
-                    <div className="bg-[#131313A6] border-none p-6 relative overflow-hidden rounded-lg border border-gray-800">
+                    <div className="bg-[#131313A6] border-none p-4 sm:p-6 relative overflow-hidden rounded-xl border border-gray-800">
                         <div
                             className="absolute top-0 right-4 -mr-28 -mt-16 w-60 h-32 
                bg-gradient-to-t from-[#F3A42C4D] to-transparent 
@@ -273,7 +281,7 @@ export default function VaultPage() {
 
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-gray-800 hover:bg-gray-800/50">
+                                <TableRow className="border-gray-800 hover:bg-gray-800/50 flex gap-28 sm:table-row">
                                     <TableHead className="text-gray-300 font-bold text-base">
                                         Transaction
                                     </TableHead>
@@ -294,7 +302,8 @@ export default function VaultPage() {
 
                             <TableBody>
                                 {parsedTxHistory?.map((transaction) => {
-                                    const isPositive = transaction?.type?.toLowerCase() === 'deposit';
+                                    const isPositive =
+                                        transaction?.type?.toLowerCase() === 'deposit';
                                     const isNeutral =
                                         transaction.type.toLowerCase() === 'bonus_allocation';
                                     return (
