@@ -32,6 +32,10 @@ const otherNavigationItems = [
         title: 'Organization Settings',
         url: '/dashboard/settings',
     },
+    {
+        title: 'Profile',
+        url: '/profile'
+    }
 ];
 
 export function MemberSidebar() {
@@ -114,7 +118,7 @@ export function MemberSidebar() {
             </div>
 
             {/* Other Links */}
-            <div className="space-y-2 flex items-center">
+            <div className="space-y-8 flex flex-col">
                 {otherNavigationItems.map((item) => (
                     <Link
                         key={item.title}

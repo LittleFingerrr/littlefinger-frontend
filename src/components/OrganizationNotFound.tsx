@@ -2,6 +2,7 @@ import React from 'react';
 import { AlertCircle, RefreshCw, Wallet, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ConnectWallet } from './connect-wallet';
 
 interface OrganizationNotFoundProps {
   onRetry?: () => void;
@@ -44,13 +45,7 @@ export const OrganizationNotFound: React.FC<OrganizationNotFoundProps> = ({
           <div className="space-y-3">
             {/* Primary action button */}
             {!isWalletConnected && onConnectWallet ? (
-              <Button
-                onClick={onConnectWallet}
-                className="w-full bg-[#967623] hover:bg-[#967623]/80 text-white rounded-3xl"
-              >
-                <Wallet className="w-4 h-4 mr-2" />
-                Connect Wallet
-              </Button>
+              <ConnectWallet className='w-full'/>
             ) : onRetry ? (
               <Button
                 onClick={onRetry}

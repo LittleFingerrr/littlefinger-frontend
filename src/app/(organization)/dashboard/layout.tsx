@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAccount } from '@starknet-react/core';
+import { useAccount, useConnect } from '@starknet-react/core';
 import { Sidebar } from '@/components/sidebar/index';
 import { Header } from '@/components/header';
 import { ContractPairProvider, useContractPair } from './ContractPairContext';
@@ -18,6 +18,8 @@ const DashboardContent = ({ children }: { children: React.ReactNode }) => {
     const handleConnectWallet = () => {
         console.log('Connect wallet clicked - handled by existing component');
     };
+
+    // const { connect, co } = useConnect();
 
     const handleRetry = () => {
         console.log('Retry clicked');

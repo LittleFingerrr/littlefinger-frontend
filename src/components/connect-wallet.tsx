@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export function ConnectWallet() {
+export function ConnectWallet({ className }: {
+    className?: string;
+}) {
     const { address, status } = useAccount();
     const { connect, connectors } = useConnect();
     const { disconnect } = useDisconnect();
@@ -29,7 +31,7 @@ export function ConnectWallet() {
             <Button
                 className={cn(
                     'px-6 lg:px-8 py-2 lg:py-5 bg-primary rounded-[3.8125rem] backdrop-blur-[3.125rem] backdrop-brightness-[100%] hover:bg-primary/90 flex items-center gap-2'
-                )}
+                ) + ' ' + className}
                 onClick={() => setDropdownOpen((prev) => !prev)}
             >
                 <span className="font-lato font-medium text-white text-xs md:text-base tracking-[0] leading-[normal]">
