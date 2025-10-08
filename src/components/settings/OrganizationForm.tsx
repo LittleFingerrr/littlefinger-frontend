@@ -19,7 +19,7 @@ export default function OrganizationForm({
     setDescription,
 }: OrganizationFormProps) {
     return (
-        <div className="bg-[#DADADA1A]/10 rounded-xl p-8 mb-8 z-20">
+        <div className="bg-[#DADADA1A]/10 rounded-xl p-4 sm:p-8 mb-8 z-20">
             <h2 className="text-2xl font-semibold mb-2">Organization Information</h2>
             <p className="text-gray-400 mb-6">Update your organization details</p>
             <form className="space-y-4">

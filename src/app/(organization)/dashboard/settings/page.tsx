@@ -12,25 +12,33 @@ export default function SettingsPage() {
     const [description, setDescription] = useState('');
 
     return (
-        <div className="min-h-screen bg-[#070602] text-white flex">
-            <main className="flex-1 relative">
-                <p className="mb-4 text-gray-300">
+        <div className="min-h-screen bg-[#070602] text-white flex flex-col">
+            <main className="flex-1 relative max-w-6xl mx-auto w-full">
+                <p className="mb-6 text-gray-300 text-sm sm:text-base text-center sm:text-left">
                     Manage your organization details and preferences
                 </p>
-                <SettingsTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-                {activeTab === 'General' && (
-                    <>
-                        <OrganizationForm
-                            orgName={orgName}
-                            setOrgName={setOrgName}
-                            email={email}
-                            setEmail={setEmail}
-                            description={description}
-                            setDescription={setDescription}
-                        />
-                        <DisplaySettings />
-                    </>
-                )}
+
+                {/* Tabs */}
+                <div className="mb-6">
+                    <SettingsTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                </div>
+
+                {/* Tab Content */}
+                <div className="space-y-8">
+                    {activeTab === 'General' && (
+                        <>
+                            <OrganizationForm
+                                orgName={orgName}
+                                setOrgName={setOrgName}
+                                email={email}
+                                setEmail={setEmail}
+                                description={description}
+                                setDescription={setDescription}
+                            />
+                            <DisplaySettings />
+                        </>
+                    )}
+                </div>
             </main>
         </div>
     );
